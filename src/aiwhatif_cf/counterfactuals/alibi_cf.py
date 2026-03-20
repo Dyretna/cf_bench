@@ -1,15 +1,16 @@
 import argparse
 import os
+
 import joblib
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from alibi.explainers import Counterfactual
 
 tf.compat.v1.disable_eager_execution()
 sess = tf.compat.v1.Session()
 tf.compat.v1.keras.backend.set_session(sess)
 
-from alibi.explainers import Counterfactual
 
 TASK_CONFIG = {
     "bp": "hltprhb",
@@ -38,17 +39,31 @@ def compute_feature_ranges_unscaled(df: pd.DataFrame, feature_cols: list[str]) -
     return fr
 
 
-def to_scaled_feature_range(fr_unscaled: dict, feature_cols: list[str], scaler) -> tuple[np.ndarray, np.ndarray]:
-    mins = np.array([fr_unscaled[c][0] for c in feature_cols], dtype=np.float32).reshape(1, -1)
-    maxs = np.array([fr_unscaled[c][1] for c in feature_cols], dtype=np.float32).reshape(1, -1)
+def to_scaled_feature_range(
+    fr_unscaled: dict, feature_cols: list[str], scaler
+) -> tuple[np.ndarray, np.ndarray]:
+    mins = np.array(
+        [fr_unscaled[c][0] for c in feature_cols], dtype=np.float32
+    ).reshape(1, -1)
+    maxs = np.array(
+        [fr_unscaled[c][1] for c in feature_cols], dtype=np.float32
+    ).reshape(1, -1)
     mins_s = scaler.transform(mins).reshape(-1).astype(np.float32)
     maxs_s = scaler.transform(maxs).reshape(-1).astype(np.float32)
     return mins_s, maxs_s
 
 
-def print_cf_changes(orig_row: pd.Series, cf_row: pd.Series, predicted_risk: float, half_threshold: float, idx: int):
+def print_cf_changes(
+    orig_row: pd.Series,
+    cf_row: pd.Series,
+    predicted_risk: float,
+    half_threshold: float,
+    idx: int,
+):
     meets_half = predicted_risk <= half_threshold
-    print(f"\nCF #{idx}: predicted_risk={predicted_risk:.4f}  meets_half_risk_target={meets_half}")
+    print(
+        f"\nCF #{idx}: predicted_risk={predicted_risk:.4f}  meets_half_risk_target={meets_half}"
+    )
     for col in orig_row.index:
         a = float(orig_row[col])
         b = float(cf_row[col])
@@ -88,8 +103,8 @@ def main():
     print("Selected query instance (first row shown):")
     print(query[feature_cols])
 
-    x_orig = query[feature_cols].values.astype(np.float32)          
-    x_orig_scaled = scaler.transform(x_orig).astype(np.float32)     
+    x_orig = query[feature_cols].values.astype(np.float32)
+    x_orig_scaled = scaler.transform(x_orig).astype(np.float32)
 
     orig_risk = float(model.predict(x_orig_scaled, verbose=0).reshape(-1)[0])
     half_threshold = orig_risk / 2.0
@@ -115,7 +130,6 @@ def main():
         p0 = 1.0 - p1
         return np.concatenate([p0, p1], axis=1)
 
-
     target_probas = [0.55, 0.65, 0.75]
 
     print("\n=== Changes per Counterfactual (vs original) ===")
@@ -129,10 +143,10 @@ def main():
             break
 
         cf_explainer = Counterfactual(
-            predict_fn,                              
+            predict_fn,
             shape=(1, x_orig_scaled.shape[1]),
             distance_fn="l1",
-            target_class=0,                          # class 0 = lower risk
+            target_class=0,  # class 0 = lower risk
             target_proba=float(tp),
             feature_range=feature_range_scaled,
             max_iter=2000,
@@ -141,19 +155,19 @@ def main():
             tol=1e-3,
             learning_rate_init=0.05,
             eps=0.01,
-            init="identity",                         # REQUIRED by this alibi version
+            init="identity",  # REQUIRED by this alibi version
             sess=sess,
         )
 
         explanation = cf_explainer.explain(x_orig_scaled)
 
-# --- robust extraction of CF from explanation (alibi versions differ) ---
+        # --- robust extraction of CF from explanation (alibi versions differ) ---
         if explanation is None or getattr(explanation, "cf", None) is None:
             continue
 
         cf_obj = explanation.cf
 
-# In some alibi versions, cf is a dict; in others it's already the array.
+        # In some alibi versions, cf is a dict; in others it's already the array.
         if isinstance(cf_obj, dict):
             x_cf_scaled = cf_obj.get("X", None)
         else:
@@ -173,19 +187,23 @@ def main():
         cf_risk = float(model.predict(x_cf_scaled, verbose=0).reshape(-1)[0])
 
         cf_series = pd.Series(x_cf, index=feature_cols)
-        print_cf_changes(query[feature_cols].iloc[0], cf_series, cf_risk, half_threshold, cf_idx)
+        print_cf_changes(
+            query[feature_cols].iloc[0], cf_series, cf_risk, half_threshold, cf_idx
+        )
 
         row_dict = cf_series.to_dict()
-        row_dict.update({
-            "row_index": row_index,
-            "task": task,
-            "method": "alibi_counterfactual",
-            "seed": seed,
-            "target_proba_used": float(tp),
-            "original_predicted_risk": orig_risk,
-            "cf_predicted_risk": cf_risk,
-            "meets_half_risk_target": (cf_risk <= half_threshold),
-        })
+        row_dict.update(
+            {
+                "row_index": row_index,
+                "task": task,
+                "method": "alibi_counterfactual",
+                "seed": seed,
+                "target_proba_used": float(tp),
+                "original_predicted_risk": orig_risk,
+                "cf_predicted_risk": cf_risk,
+                "meets_half_risk_target": (cf_risk <= half_threshold),
+            }
+        )
         results.append(row_dict)
         cf_idx += 1
 
@@ -195,7 +213,9 @@ def main():
     print(f"\nSaved counterfactuals to: {out_path}")
 
     if cf_idx < n_cfs:
-        print(f"WARNING: Only generated {cf_idx}/{n_cfs} CFs. Try lowering target_probas or increasing max_iter.")
+        print(
+            f"WARNING: Only generated {cf_idx}/{n_cfs} CFs. Try lowering target_probas or increasing max_iter."
+        )
 
 
 if __name__ == "__main__":

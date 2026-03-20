@@ -1,19 +1,20 @@
-# diabetes = hltprdi
+# blood pressure = hltprhc
 from pathlib import Path
-import pandas as pd
-import joblib
+
 import dice_ml
+import joblib
+import pandas as pd
 
 
 def main():
     project_root = Path(__file__).resolve().parent.parent
 
     data_path = project_root / "data" / "ess_model_ready.csv"
-    model_path = project_root / "models" / "rf_hltprdi.pkl"
+    model_path = project_root / "models" / "rf_hltprhc.pkl"
     out_dir = project_root / "outputs" / "counterfactuals"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    target_col = "hltprdi"
+    target_col = "hltprhc"
     outcome_cols = ["hltprhb", "hltprhc", "hltprdi"]
 
     df = pd.read_csv(data_path)
@@ -37,16 +38,10 @@ def main():
     print()
 
     dice_data = dice_ml.Data(
-        dataframe=df_dice,
-        continuous_features=["bmi"],
-        outcome_name=target_col
+        dataframe=df_dice, continuous_features=["bmi"], outcome_name=target_col
     )
 
-    dice_model = dice_ml.Model(
-        model=model,
-        backend="sklearn",
-        model_type="classifier"
-    )
+    dice_model = dice_ml.Model(model=model, backend="sklearn", model_type="classifier")
 
     explainer = dice_ml.Dice(dice_data, dice_model, method="random")
 
@@ -60,18 +55,15 @@ def main():
     print()
 
     cf = explainer.generate_counterfactuals(
-        query_instance,
-        total_CFs=3,
-        desired_class=0,
-        features_to_vary=features_to_vary
+        query_instance, total_CFs=3, desired_class=0, features_to_vary=features_to_vary
     )
 
     cf_df = cf.cf_examples_list[0].final_cfs_df.copy()
-    out_path = out_dir / "dice_dm_counterfactuals.csv"
+    out_path = out_dir / "dice_hd_counterfactuals.csv"
     cf_df.to_csv(out_path, index=False)
 
     print("Counterfactuals generated and saved to:", out_path)
-    print("\n DiCE (diabetes) completed.")
+    print("\n DiCE (heart disease) completed.")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+# ruff: noqa
+
 """
 This module implements a hybrid explanatory framework that combines
 Karimi-style certified causal recourse with Baron-style philosophical
@@ -53,23 +55,77 @@ and the philosophical constraints that determine when such recourse
 counts as an explanation in a deeper sense.
 """
 
-
+from dice_ml.utils import helpers
 from dowhy import CausalModel
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
-# Assume we already have:
-# - df (Adult dataset)
-# - causal_graph (as defined earlier)
-# - model (CausalModel)
-# - causal_estimate (effect of education_num on income)
+data_obj = helpers.load_adult_income_dataset()
+df = data_obj.dataframe.copy()
+
+target = data_obj.outcome_name
+
+X = df.drop(columns=[target])
+y = df[target]
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+# Train a predictive model (not causal)
+clf = RandomForestClassifier(random_state=0)
+clf.fit(X_train, y_train)
+
+
+# ---------------------------------------------------------
+# Define a Structural Causal Model (SCM)
+#
+# We define a simplified causal graph for the Adult dataset.
+# This is NOT learned from data — it is imposed based on domain knowledge.
+#
+# Example causal assumptions:
+#     age → education_num → occupation → income
+#     age → hours_per_week → income
+#     sex → occupation → income
+#     race → occupation → income
+#
+# This is a simplified SCM but sufficient to illustrate certified recourse.
+# ---------------------------------------------------------
+
+causal_graph = """
+digraph {
+    age -> education_num;
+    education_num -> occupation;
+    occupation -> income;
+    age -> hours_per_week;
+    hours_per_week -> income;
+    sex -> occupation;
+    race -> occupation;
+}
+"""
+
+model = CausalModel(
+    data=df, treatment="education_num", outcome="income", graph=causal_graph
+)
+identified_estimand = model.identify_effect()
+
+# ---------------------------------------------------------
+# Compute causal effect of an intervention
+#
+# This step computes the effect of do(education_num = x).
+# This is the core of certified causal recourse: we compute the effect of
+# an intervention, not a correlation-based counterfactual.
+# ---------------------------------------------------------
+
+causal_estimate = model.estimate_effect(
+    identified_estimand, method_name="backdoor.linear_regression"
+)
+
 
 # ---------------------------------------------------------
 # 1. Identify causal pathways (Baron-style)
 # ---------------------------------------------------------
 
-causal_paths = model.get_directed_paths(
-    "education_num",
-    "income"
-)
+causal_paths = model.get_directed_paths("education_num", "income")
 
 print("Causal pathways from education_num to income:")
 for path in causal_paths:
@@ -79,6 +135,7 @@ for path in causal_paths:
 # 2. Check Baron’s minimality criterion
 # ---------------------------------------------------------
 
+
 def is_minimal_intervention(delta, threshold=0.01):
     """
     Baron-style minimality:
@@ -86,6 +143,7 @@ def is_minimal_intervention(delta, threshold=0.01):
     would change the outcome.
     """
     return abs(delta) > threshold
+
 
 minimal = is_minimal_intervention(causal_estimate.value)
 
@@ -95,6 +153,7 @@ print("\nIs the intervention minimal (Baron-style)?", minimal)
 # 3. Check explanatory relevance
 # ---------------------------------------------------------
 
+
 def is_explanatorily_relevant(path):
     """
     Baron-style relevance:
@@ -102,6 +161,7 @@ def is_explanatorily_relevant(path):
     from the intervention to the outcome.
     """
     return "income" in path[-1]
+
 
 relevant_paths = [p for p in causal_paths if is_explanatorily_relevant(p)]
 

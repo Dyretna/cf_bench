@@ -41,9 +41,6 @@ causal recourse requires a fundamentally different framework.
 
 import dice_ml
 from dice_ml import Dice
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-import pandas as pd
 
 # Load the Adult Income dataset provided by DiCE.
 # This dataset includes demographic and socioeconomic variables, but crucially,
@@ -51,6 +48,9 @@ import pandas as pd
 # one another. DiCE therefore treats all features as manipulable unless the
 # user manually specifies constraints.
 from dice_ml.utils import helpers
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
 data_obj = helpers.load_adult_income_dataset()
 df = data_obj.dataframe
 
@@ -60,9 +60,7 @@ X = df.drop(columns=[target])
 y = df[target]
 
 # Standard ML train/test split.
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=0
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
 # Train a predictive model.
 # This model captures correlations in the dataset, not causal mechanisms.
@@ -72,16 +70,11 @@ clf.fit(X_train, y_train)
 # Create a DiCE Data object.
 # This object describes the dataset but does not encode causal constraints.
 d = dice_ml.Data(
-    dataframe=df,
-    continuous_features=data_obj.continuous_features,
-    outcome_name=target
+    dataframe=df, continuous_features=data_obj.continuous_features, outcome_name=target
 )
 
 # Wrap the trained model for DiCE.
-m = dice_ml.Model(
-    model=clf,
-    backend="sklearn"
-)
+m = dice_ml.Model(model=clf, backend="sklearn")
 
 # Initialize a DiCE explainer.
 # The "random" method searches the input space heuristically.
@@ -95,9 +88,7 @@ query_instance = X_test.iloc[0:1]
 # These counterfactuals are valid only in the model's correlation space.
 # They are NOT certified causal interventions.
 dice_exp = exp.generate_counterfactuals(
-    query_instance,
-    total_CFs=5,
-    desired_class="opposite"
+    query_instance, total_CFs=5, desired_class="opposite"
 )
 
 # Display the generated counterfactuals.

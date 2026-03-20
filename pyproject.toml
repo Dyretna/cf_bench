@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai_counterfactuals_tests"
+version = "0.1.0"
+description = "testground of counterfactual models in nightingale 'aiwhatif' project"
+readme = "README.md"
+requires-python = ">=3.11, <3.13"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Roozhin Heydari", email = "heydari.roozhin@gmail.com"},
+    {name = "Jesper Anteryd", email = "jesper.anteryd@proton.me"},
+]
+keywords = ["ai", "counterfactuals"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.3",
+    "scikit-learn>=1.4",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit>=3.3",
+    "pytest>=7.4",
+    "ipython>=8.14",
+    "ipykernel>=6.25",
+]
+
+[project.urls]
+Repository = "https://github.com/Dyretna/ai_counterfactuals_tests"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

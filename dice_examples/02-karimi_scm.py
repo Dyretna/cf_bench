@@ -12,16 +12,14 @@ a causal graph. This reflects the requirement in Karimi et al. that causal
 recourse depends on domain knowledge, not on correlations learned from data.
 """
 
-import pandas as pd
-import numpy as np
-from dowhy import CausalModel
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-
 # ---------------------------------------------------------
 # 1. Load Adult Income dataset
 # ---------------------------------------------------------
 from dice_ml.utils import helpers
+from dowhy import CausalModel
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
 data_obj = helpers.load_adult_income_dataset()
 df = data_obj.dataframe.copy()
 
@@ -31,9 +29,7 @@ X = df.drop(columns=[target])
 y = df[target]
 
 # Train-test split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=0
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
 # Train a predictive model (not causal)
 clf = RandomForestClassifier(random_state=0)
@@ -68,10 +64,7 @@ digraph {
 """
 
 model = CausalModel(
-    data=df,
-    treatment="education_num",
-    outcome="income",
-    graph=causal_graph
+    data=df, treatment="education_num", outcome="income", graph=causal_graph
 )
 
 identified_estimand = model.identify_effect()
@@ -86,8 +79,7 @@ an intervention, not a correlation-based counterfactual.
 """
 
 causal_estimate = model.estimate_effect(
-    identified_estimand,
-    method_name="backdoor.linear_regression"
+    identified_estimand, method_name="backdoor.linear_regression"
 )
 
 print("Estimated causal effect of education_num on income:")

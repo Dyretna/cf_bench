@@ -3,11 +3,9 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import joblib
-
+import matplotlib.pyplot as plt
+import pandas as pd
 
 OUTCOME_COLS = ["hltprhb", "hltprhc", "hltprdi"]
 
@@ -147,19 +145,25 @@ def main() -> None:
         raise ValueError(f"Target column '{target_col}' not found in {data_path}.")
     for oc in OUTCOME_COLS:
         if oc not in df.columns:
-            raise ValueError(f"Expected outcome column '{oc}' not found in {data_path}.")
+            raise ValueError(
+                f"Expected outcome column '{oc}' not found in {data_path}."
+            )
 
     feature_cols = [c for c in df.columns if c not in OUTCOME_COLS]
 
     df_dice = df[feature_cols + [target_col]].copy()
     positives = df_dice[df_dice[target_col] == 1]
     if positives.empty:
-        raise RuntimeError(f"No positive cases found for {target_col}=1; cannot reconstruct query instance.")
+        raise RuntimeError(
+            f"No positive cases found for {target_col}=1; cannot reconstruct query instance."
+        )
 
     query_instance = positives.sample(n=1, random_state=args.seed)[feature_cols].copy()
 
     print(f"\nTask: {args.task}  (target={target_col})")
-    print(f"Reconstructed query instance using positives.sample(random_state={args.seed})")
+    print(
+        f"Reconstructed query instance using positives.sample(random_state={args.seed})"
+    )
     print("Selected query instance (first row shown):")
     print(query_instance.head(1))
     print()
@@ -181,27 +185,39 @@ def main() -> None:
 
     query_df = query_instance.copy()
     query_df["predicted_risk"] = query_prob
-    query_df["meets_half_risk_target"] = True  
+    query_df["meets_half_risk_target"] = True
 
     feature_cols_for_plot = _infer_feature_cols(query_df, cf_df)
 
     matrix = pd.concat(
         [
             query_df[feature_cols_for_plot].assign(_label="Original"),
-            cf_df[feature_cols_for_plot].assign(_label=[f"CF{i}" for i in range(len(cf_df))]),
+            cf_df[feature_cols_for_plot].assign(
+                _label=[f"CF{i}" for i in range(len(cf_df))]
+            ),
         ],
         ignore_index=True,
     ).set_index("_label")
 
     orig_vals = pd.to_numeric(query_df[feature_cols_for_plot].iloc[0], errors="coerce")
-    deltas = cf_df[feature_cols_for_plot].apply(pd.to_numeric, errors="coerce").sub(orig_vals, axis=1)
+    deltas = (
+        cf_df[feature_cols_for_plot]
+        .apply(pd.to_numeric, errors="coerce")
+        .sub(orig_vals, axis=1)
+    )
     deltas.index = [f"CF{i}" for i in range(len(deltas))]
 
     heatmap_path = out_dir / f"{args.task}_heatmap.png"
     delta_path = out_dir / f"{args.task}_delta_heatmap.png"
 
-    _save_heatmap(matrix, heatmap_path, title=f"Original vs Counterfactuals ({args.task})")
-    _save_heatmap(deltas, delta_path, title=f"Counterfactual Changes (CF - Original) ({args.task})")
+    _save_heatmap(
+        matrix, heatmap_path, title=f"Original vs Counterfactuals ({args.task})"
+    )
+    _save_heatmap(
+        deltas,
+        delta_path,
+        title=f"Counterfactual Changes (CF - Original) ({args.task})",
+    )
 
     _print_recommendations(query_df.iloc[0], cf_df, feature_cols_for_plot, top_k=10)
 
