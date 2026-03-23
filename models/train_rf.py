@@ -1,10 +1,18 @@
+import os
 from pathlib import Path
-import pandas as pd
-import joblib
 
-from sklearn.model_selection import train_test_split
+import joblib
+import pandas as pd
+from dotenv import load_dotenv
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
+from sklearn.model_selection import train_test_split
+
+load_dotenv()
+
+PROJECT_ROOT = Path(os.getenv("PROJECT_ROOT"))
+DATA_DIR = Path(os.getenv("DATA_DIR"))
+MODELS_DIR = Path(os.getenv("MODELS_DIR"))
 
 
 def train_one_target(df: pd.DataFrame, target_col: str, out_dir: Path) -> None:
@@ -14,7 +22,9 @@ def train_one_target(df: pd.DataFrame, target_col: str, out_dir: Path) -> None:
 
     outcome_cols = ["hltprhb", "hltprhc", "hltprdi"]
     if target_col not in outcome_cols:
-        raise ValueError(f"Unknown target '{target_col}'. Expected one of: {outcome_cols}")
+        raise ValueError(
+            f"Unknown target '{target_col}'. Expected one of: {outcome_cols}"
+        )
 
     feature_cols = [c for c in df.columns if c not in outcome_cols]
 
@@ -22,7 +32,7 @@ def train_one_target(df: pd.DataFrame, target_col: str, out_dir: Path) -> None:
     y = df[target_col].copy()
 
     uniq = sorted(y.dropna().unique())
-    print(f"\n==============================")
+    print("\n==============================")
     print(f"Training target: {target_col}")
     print(f"Unique values in target: {uniq}")
     print("Target distribution (normalized):")
@@ -30,21 +40,13 @@ def train_one_target(df: pd.DataFrame, target_col: str, out_dir: Path) -> None:
     print("==============================\n")
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=0.2,
-        random_state=42,
-        stratify=y
+        X, y, test_size=0.2, random_state=42, stratify=y
     )
 
     rf_model = RandomForestClassifier(
-        n_estimators=300,
-        max_depth=None,
-        min_samples_leaf=5,
-        random_state=42,
-        n_jobs=-1
+        n_estimators=300, max_depth=None, min_samples_leaf=5, random_state=42, n_jobs=-1
     )
-    
+
     rf_model.fit(X_train, y_train)
 
     y_pred = rf_model.predict(X_test)
@@ -75,9 +77,10 @@ def train_one_target(df: pd.DataFrame, target_col: str, out_dir: Path) -> None:
 
 
 def main():
-    project_root = Path(__file__).resolve().parent.parent
-    data_path = project_root / "data" / "ess_model_ready.csv"
-    models_dir = project_root / "models"
+    data_path = DATA_DIR / "03_model_ready_presplit" / "ess_model_ready_v1.csv"
+    print("\npath to data:", data_path)
+    print("data-path is file:", data_path.is_file(), "\n")
+    models_dir = MODELS_DIR
 
     df = pd.read_csv(data_path)
     print("Loaded dataset:", data_path)
