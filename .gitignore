@@ -221,3 +221,6 @@ __marimo__/
 LINKS.md
 CF_and_evaluation_frameworks.md
 devlog.ipynb
+
+# rf models (too big)
+*.pkl

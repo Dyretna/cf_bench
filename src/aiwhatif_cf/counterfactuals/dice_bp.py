@@ -1,30 +1,39 @@
 # blood pressure = hltprhb
+import os
 from pathlib import Path
 
 import dice_ml
 import joblib
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# dirs
+DATA_DIR = Path(os.getenv("DATA_DIR"))
+MODELS_DIR = Path(os.getenv("MODELS_DIR"))
+CF_OUTPUTS_DIR = Path(os.getenv("CF_OUTPUTS"))
+
+# file / model paths
+DATA_PATH = DATA_DIR / "05_single_target" / "ess_ready_v2_hltprhb.csv"
+MODEL_PATH = MODELS_DIR / "rf_hltprhb_2026-03-24.pkl"
+TARGET = "hltprhb"
 
 
 def main():
-    project_root = Path(__file__).resolve().parent.parent
-
-    data_path = project_root / "data" / "ess_model_ready.csv"
-    model_path = project_root / "models" / "rf_hltprhb.pkl"
-    out_dir = project_root / "outputs" / "counterfactuals"
+    data_path = DATA_PATH
+    model_path = MODEL_PATH
+    out_dir = CF_OUTPUTS_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
+    target_col = TARGET
 
-    target_col = "hltprhb"
-    outcome_cols = ["hltprhb", "hltprhc", "hltprdi"]
-
-    df = pd.read_csv(data_path)
+    df_dice = pd.read_csv(data_path)
     print("Loaded data:", data_path)
-    print("Shape:", df.shape)
+    print("Shape:", df_dice.shape)
     print()
 
-    feature_cols = [c for c in df.columns if c not in outcome_cols]
-
-    df_dice = df[feature_cols + [target_col]].copy()
+    # list of feature names - not dataframe!
+    feature_cols = df_dice.drop(columns=[target_col]).columns.tolist()
 
     model = joblib.load(model_path)
     print("Loaded model:", model_path)
@@ -41,9 +50,7 @@ def main():
     dice_data = dice_ml.Data(
         dataframe=df_dice, continuous_features=["bmi"], outcome_name=target_col
     )
-
     dice_model = dice_ml.Model(model=model, backend="sklearn", model_type="classifier")
-
     explainer = dice_ml.Dice(dice_data, dice_model, method="random")
 
     positives = df_dice[df_dice[target_col] == 1]
