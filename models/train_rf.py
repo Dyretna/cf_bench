@@ -12,6 +12,7 @@ load_dotenv()
 
 PROJECT_ROOT = Path(os.getenv("PROJECT_ROOT"))
 DATA_DIR = Path(os.getenv("DATA_DIR"))
+DATA_PATH = DATA_DIR / "04_multi_target" / "ess_model_ready_v2.csv"
 MODELS_DIR = Path(os.getenv("MODELS_DIR"))
 
 
@@ -77,7 +78,7 @@ def train_one_target(df: pd.DataFrame, target_col: str, out_dir: Path) -> None:
 
 
 def main():
-    data_path = DATA_DIR / "03_model_ready_presplit" / "ess_model_ready_v1.csv"
+    data_path = DATA_PATH
     print("\npath to data:", data_path)
     print("data-path is file:", data_path.is_file(), "\n")
     models_dir = MODELS_DIR

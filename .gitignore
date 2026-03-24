@@ -206,11 +206,18 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# LOCAL
-# -----
-.python-version
 
-data
-*.mp4
+# ----------------------------------
+#   LOCAL
+# ----------------------------------
+.python-version
 *.env
-*_embedding_db
+
+# heavy media
+*.mp4
+*.png
+
+# private documentation
+LINKS.md
+CF_and_evaluation_frameworks.md
+devlog.ipynb
