@@ -221,6 +221,11 @@ __marimo__/
 LINKS.md
 CF_and_evaluation_frameworks.md
 devlog.ipynb
+architechture_discussion.md
 
 # rf models (too big)
 *.pkl
+
+src/aiwhatif_cf/.legacy
+
+/cf_outputs
