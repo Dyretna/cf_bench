@@ -222,6 +222,7 @@ LINKS.md
 CF_and_evaluation_frameworks.md
 devlog.ipynb
 architechture_discussion.md
+.articles
 
 # rf models (too big)
 *.pkl
