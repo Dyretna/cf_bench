@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 
-from aiwhatif_cf.dice_pipeline.config import DicePipelineConfig
+from aiwhatif_cf.config import DicePipelineConfig
 
 
 def main():
