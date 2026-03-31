@@ -16,21 +16,31 @@ def main():
     load_dotenv()
 
     models_dir = Path(os.getenv("MODELS_DIR"))
-    config = DicePipelineConfig()
 
-    rf_model = RandomForestClassifier(
-        n_estimators=300, max_depth=None, min_samples_leaf=5, random_state=42, n_jobs=-1
+    # Targets you want to train
+    targets = ["hltprhb", "hltprhc"]
+    # RF model template (we clone it for each target)
+    base_rf = RandomForestClassifier(
+        n_estimators=300,
+        max_depth=None,
+        min_samples_leaf=5,
+        random_state=42,
+        n_jobs=-1,
     )
 
-    setups = [
-        (config.train_data_path_bp, config.test_data_path_bp, config.target_bp),
-        (config.train_data_path_hc, config.test_data_path_hc, config.target_hc),
-    ]
-    for train_path, test_path, target in setups:
-        df_train, df_test = load_dataset(train_path, test_path)
-        train_rf_model(df_train, df_test, target, rf_model, models_dir)
+    for target in targets:
+        print(f"\n=== Training model for target: {target} ===")
 
-    print("\n Training completed for all targets.")
+        # Create config for this target
+        config = DicePipelineConfig(target=target)
+
+        # Load data
+        df_train, df_test = load_dataset(config.train_data_path, config.test_data_path)
+
+        # Train model
+        train_rf_model(df_train, df_test, target, base_rf, models_dir)
+
+    print("\nTraining completed for all targets.")
 
 
 def load_dataset(
@@ -71,7 +81,6 @@ def train_rf_model(
 
     uniq = sorted(y.dropna().unique())
     print("\n==============================")
-    print(f"Training target: {target}")
     print(f"Unique values in target: {uniq}")
     print("Target distribution (normalized):")
     print(y.value_counts(normalize=True))
