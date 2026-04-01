@@ -1,5 +1,4 @@
 import datetime as dt
-import os
 from pathlib import Path
 
 import joblib
@@ -7,18 +6,13 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 
-from aiwhatif_cf.config import DicePipelineConfig
+from aiwhatif_cf.config.config import DiceConfig
 
 
 def main():
-    from dotenv import load_dotenv
-
-    load_dotenv()
-
-    models_dir = Path(os.getenv("MODELS_DIR"))
-
     # Targets you want to train
     targets = ["hltprhb", "hltprhc"]
+
     # RF model template (we clone it for each target)
     base_rf = RandomForestClassifier(
         n_estimators=300,
@@ -32,13 +26,13 @@ def main():
         print(f"\n=== Training model for target: {target} ===")
 
         # Create config for this target
-        config = DicePipelineConfig(target=target)
+        config = DiceConfig(target=target)
 
         # Load data
         df_train, df_test = load_dataset(config.train_data_path, config.test_data_path)
 
         # Train model
-        train_rf_model(df_train, df_test, target, base_rf, models_dir)
+        train_rf_model(df_train, df_test, target, base_rf, config.model_dir)
 
     print("\nTraining completed for all targets.")
 

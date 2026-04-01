@@ -1,17 +1,14 @@
-from pathlib import Path
-
 import pandas as pd
 
 
 class DiceRecommender:
-    def __init__(self, feature_cols: list[str], target: str, data_filename: Path):
+    def __init__(self, feature_cols: list[str], target: str):
         self.feature_cols = feature_cols
         self.target = target
-        self.data_filename = data_filename
 
     def get_recommendations(
         self,
-        original: pd.DataFrame,
+        query_instances: pd.DataFrame,
         annoted_counterfactuals: pd.DataFrame,
     ) -> list[dict]:
         """
@@ -24,7 +21,7 @@ class DiceRecommender:
 
         Parameters
         ----------
-        original : pd.Dataframe
+        query_instances : pd.Dataframe
             A single-row representation of the original individual from which
             counterfactuals were generated.
 
@@ -63,7 +60,7 @@ class DiceRecommender:
         for _, row in annoted_counterfactuals.iterrows():
             changes = []
             for col in self.feature_cols:
-                orig = original[col].iloc[0]
+                orig = query_instances[col].iloc[0]
                 new = row[col]
                 if pd.isna(orig) or pd.isna(new):
                     continue
@@ -85,7 +82,7 @@ class DiceRecommender:
         return results
 
     def format_recommendations(
-        self, query_instance: pd.DataFrame, recs: list[dict], true_outcome: int | str
+        self, query_instances: pd.DataFrame, recs: list[dict], true_outcome: int | str
     ) -> str:
         """
         Format original instance information and counterfactual recommendations
@@ -93,7 +90,7 @@ class DiceRecommender:
 
         Parameters
         ----------
-        query_instance : pd.DataFrame
+        query_instances : pd.DataFrame
             A single-row DataFrame containing the original feature values.
         recs : list[dict]
             A list of counterfactual recommendation dictionaries. Each dict must
@@ -118,7 +115,7 @@ class DiceRecommender:
                 - per-counterfactual changes and risk info
         """
 
-        if query_instance is None or query_instance.empty:
+        if query_instances is None or query_instances.empty:
             return "No query instance provided."
 
         if not recs:
@@ -130,11 +127,10 @@ class DiceRecommender:
 
         # --- Header ---
         lines.append(f"Task / Target: {self.target}")
-        lines.append(f"Data filename: {self.data_filename}")
         lines.append(f"Selected query instance (index {qidx}):\n")
 
         # Original instance
-        lines.append(query_instance.to_string(index=False))
+        lines.append(query_instances.to_string(index=False))
         lines.append("")
 
         # Original + target risk

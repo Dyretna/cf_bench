@@ -223,6 +223,8 @@ CF_and_evaluation_frameworks.md
 devlog.ipynb
 architechture_discussion.md
 .articles
+examples.dice_theory
+TODO.md
 
 # rf models (too big)
 *.pkl

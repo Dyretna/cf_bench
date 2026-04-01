@@ -99,7 +99,7 @@ class RiskEvaluator:
         return self.model.predict_proba(df[self.feature_cols])[:, 1]
 
     def annotate(
-        self, query_original: pd.DataFrame, counterfactuals: pd.DataFrame
+        self, query_instances: pd.DataFrame, counterfactuals: pd.DataFrame
     ) -> pd.DataFrame:
         """
         Add risk-related columns to a counterfactual DataFrame.
@@ -129,10 +129,10 @@ class RiskEvaluator:
             counterfactuals["cf_id"] = [f"cf_{i}" for i in range(len(counterfactuals))]
         # Assign CF query index if missing
         if "query_index" not in counterfactuals.columns:
-            counterfactuals["query_index"] = int(query_original.index[0])
+            counterfactuals["query_index"] = int(query_instances.index[0])
 
         # Compute risks
-        original_prob = self.compute_original_risk(query_original)
+        original_prob = self.compute_original_risk(query_instances)
         target_risk = original_prob * self.target_factor
 
         counterfactuals["original_risk"] = original_prob
