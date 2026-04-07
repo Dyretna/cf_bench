@@ -14,11 +14,30 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
-from aiwhatif_cf.config import MODELS_DIR, TEST_DATA_PATH, TRAIN_DATA_PATH, SystemConfig
+from aiwhatif_cf.config import (
+    MODELS_DIR,
+    TEST_DATA_PATH_HB,
+    TEST_DATA_PATH_HC,
+    TRAIN_DATA_PATH_HB,
+    TRAIN_DATA_PATH_HC,
+    SystemConfig,
+)
+
+TRAIN_PATHS = {
+    "hltprhb": TRAIN_DATA_PATH_HB,
+    "hltprhc": TRAIN_DATA_PATH_HC,
+}
+
+TEST_PATHS = {
+    "hltprhb": TEST_DATA_PATH_HB,
+    "hltprhc": TEST_DATA_PATH_HC,
+}
 
 
 def main():
-    # RF model template (we clone it for each target)
+    targets = ["hltprhb", "hltprhc"]
+
+    # RF model template (clone for each target)
     base_rf = RandomForestClassifier(
         n_estimators=300,
         max_depth=None,
@@ -27,17 +46,14 @@ def main():
         n_jobs=-1,
     )
 
-    config = SystemConfig()
-    feature_cols = config.feature_cols
+    for target in targets:
+        config = SystemConfig(target=target)
+        feature_cols = config.feature_cols
 
-    for target in config.targets:
         print(f"\n=== Training model for target: {target} ===")
 
         # Load data
-        df_train, df_test = load_dataset(
-            TRAIN_DATA_PATH,
-            TEST_DATA_PATH,
-        )
+        df_train, df_test = load_dataset(TRAIN_PATHS[target], TEST_PATHS[target])
 
         # Train model
         model = clone(base_rf)

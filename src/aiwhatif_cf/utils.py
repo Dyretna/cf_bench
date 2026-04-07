@@ -88,7 +88,7 @@ def export_batch_results(
         f.write(str(explainer_profile))
 
     # --- Save formatted recommendations (already formatted) ---
-    rec_path = output_dir / f"recs_{suffix}.txt"
+    rec_path = output_dir / f"recs_{suffix}"
     with open(rec_path, "w", encoding="utf-8") as f:
         f.write("=== RECOMMENDATIONS ===\n\n")
         for formatted in formatted_recommendations:

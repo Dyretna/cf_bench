@@ -8,7 +8,8 @@ import pandas as pd
 from .config import (  # GradientExplainerProfile, <-- not in use, no NN model
     CF_OUTPUTS,
     MODELS_DIR,
-    TEST_DATA_PATH,
+    TEST_DATA_PATH_HB,
+    TEST_DATA_PATH_HC,
     GeneticExplainerProfile,
     RandomExplainerProfile,
     SystemConfig,
@@ -22,7 +23,20 @@ from .utils import build_annotated_batch, export_batch_results
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
-MODEL_PATH_FORMAT = MODELS_DIR / "rf_{target}_2026-04-02.pkl"
+# -----------------------------------------------------------------------------
+#   Set test paths to dict - to be used dynamically on loop
+# -----------------------------------------------------------------------------
+
+TEST_PATHS = {
+    "hltprhb": TEST_DATA_PATH_HB,
+    "hltprhc": TEST_DATA_PATH_HC,
+}
+
+MODEL_PATH_FORMAT = MODELS_DIR / "rf_{target}_2026-04-07.pkl"
+
+# -----------------------------------------------------------------------------
+#   Run each target and profile in main...
+# -----------------------------------------------------------------------------
 
 
 def main():
@@ -41,13 +55,17 @@ def main():
             run_explainer_for_target(config, explainer_profile)
 
 
+# --- The Runner ---
+# ==================
+
+
 def run_explainer_for_target(config, explainer_profile):
     target = config.target
 
     # load model and data
     predictor_model = joblib.load(str(MODEL_PATH_FORMAT).format(target=target))
 
-    df = pd.read_csv(TEST_DATA_PATH)
+    df = pd.read_csv(TEST_PATHS[target])
     df = df[config.feature_cols + [target]]
 
     # create pipeline

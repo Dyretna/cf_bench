@@ -1,0 +1,39 @@
+=== RANDOM FOREST MODEL INFO ===
+
+Target variable: hltprhb
+Model path: /home/dyretna/Dokument/Code/GitHub/nightingale_projects/ai_counterfactuals_tests/models/rf_hltprhb_2026-04-07.pkl
+Date trained: 2026-04-07
+
+=== PARAMETERS ===
+bootstrap: True
+ccp_alpha: 0.0
+class_weight: None
+criterion: gini
+max_depth: None
+max_features: sqrt
+max_leaf_nodes: None
+max_samples: None
+min_impurity_decrease: 0.0
+min_samples_leaf: 5
+min_samples_split: 2
+min_weight_fraction_leaf: 0.0
+monotonic_cst: None
+n_estimators: 300
+n_jobs: -1
+oob_score: False
+random_state: 42
+verbose: 0
+warm_start: False
+
+=== PERFORMANCE (TEST SET) ===
+              precision    recall  f1-score   support
+
+           0       0.87      0.62      0.72      6461
+           1       0.32      0.66      0.43      1760
+
+    accuracy                           0.63      8221
+   macro avg       0.60      0.64      0.58      8221
+weighted avg       0.75      0.63      0.66      8221
+
+Accuracy: 0.6279
+ROC-AUC: 0.6974

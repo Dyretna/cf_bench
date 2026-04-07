@@ -161,7 +161,7 @@ class RandomExplainerProfile:
     posthoc_sparsity_algorithm: str = "linear"
     permitted_range: Optional[dict] = None
     features_to_vary: Optional[list[str]] = None
-    random_seed: int = 101
+    random_seed: int = 42
 
     def to_cf_params(self):
         return {
