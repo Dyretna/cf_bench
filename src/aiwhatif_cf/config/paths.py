@@ -8,10 +8,10 @@ DATA_DIR = Path(os.getenv("DATA_DIR"))
 MODELS_DIR = Path(os.getenv("MODELS_DIR"))
 CF_OUTPUTS = Path(os.getenv("CF_OUTPUTS"))
 
-TRAIN_DATA_PATH = DATA_DIR / "05_single_target" / "ess_ready_v2_hltprhb_train.csv"
-TEST_DATA_PATH = DATA_DIR / "05_single_target" / "ess_ready_v2_hltprhb_test.csv"
-MODEL_PATH_HB = MODELS_DIR / "rf_hltprhb_2026-03-31.pkl"
-MODEL_PATH_HC = MODELS_DIR / "rf_hltprhc_2026-03-31.pkl"
+TRAIN_DATA_PATH = DATA_DIR / "04_multi_target" / "ess_model_ready_v2_train.csv"
+TEST_DATA_PATH = DATA_DIR / "04_multi_target" / "ess_model_ready_v2_test.csv"
+MODEL_PATH_HB = MODELS_DIR / "rf_hltprhb_2026-04-02.pkl"
+MODEL_PATH_HC = MODELS_DIR / "rf_hltprhc_2026-04-02.pkl"
 
 
 def check_paths():
@@ -24,3 +24,7 @@ def check_paths():
         f"MODEL_PATH_HB: {MODEL_PATH_HB} | is_file: {MODEL_PATH_HB.is_file()}\n"
         f"MODEL_PATH_HC: {MODEL_PATH_HC} | is_file: {MODEL_PATH_HC.is_file()}"
     )
+
+
+if __name__ == "__main__":
+    print(check_paths())

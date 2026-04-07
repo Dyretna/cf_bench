@@ -213,9 +213,10 @@ __marimo__/
 .python-version
 *.env
 
-# heavy media
+# heavy media or zips
 *.mp4
 *.png
+*.zip
 
 # private documentation
 LINKS.md
@@ -225,10 +226,10 @@ architechture_discussion.md
 .articles
 examples.dice_theory
 TODO.md
+.CF-Transitions*
 
 # rf models (too big)
 *.pkl
 
-src/aiwhatif_cf/.legacy
-
+.legacy
 /cf_outputs

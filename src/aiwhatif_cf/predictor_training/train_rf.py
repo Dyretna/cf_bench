@@ -2,17 +2,22 @@ import datetime as dt
 from pathlib import Path
 
 import joblib
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from sklearn.base import clone
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    accuracy_score,
+    classification_report,
+    roc_auc_score,
+)
 
-from aiwhatif_cf.config.config import DiceConfig
+from aiwhatif_cf.config import MODELS_DIR, TEST_DATA_PATH, TRAIN_DATA_PATH, SystemConfig
 
 
 def main():
-    # Targets you want to train
-    targets = ["hltprhb", "hltprhc"]
-
     # RF model template (we clone it for each target)
     base_rf = RandomForestClassifier(
         n_estimators=300,
@@ -22,19 +27,105 @@ def main():
         n_jobs=-1,
     )
 
-    for target in targets:
+    config = SystemConfig()
+    feature_cols = config.feature_cols
+
+    for target in config.targets:
         print(f"\n=== Training model for target: {target} ===")
 
-        # Create config for this target
-        config = DiceConfig(target=target)
-
         # Load data
-        df_train, df_test = load_dataset(config.train_data_path, config.test_data_path)
+        df_train, df_test = load_dataset(
+            TRAIN_DATA_PATH,
+            TEST_DATA_PATH,
+        )
 
         # Train model
-        train_rf_model(df_train, df_test, target, base_rf, config.model_dir)
+        model = clone(base_rf)
+        train_rf_model(df_train, df_test, feature_cols, target, model, MODELS_DIR)
 
     print("\nTraining completed for all targets.")
+
+
+def train_rf_model(
+    df_train: pd.DataFrame,
+    df_test: pd.DataFrame,
+    feature_cols: list,
+    target: str,
+    rf_model: RandomForestClassifier,
+    out_dir: Path,
+) -> None:
+    """
+    Train a Random Forest classifier for a single target column and save the model.
+    """
+
+    # --- Select features ---
+    X = df_train[feature_cols].copy()
+    y = df_train[target].copy()
+    X_test = df_test[feature_cols].copy()
+    y_test = df_test[target].copy()
+
+    uniq = sorted(y.dropna().unique())
+    print("\n==============================")
+    print(f"Unique values in target: {uniq}")
+    print("Target distribution (normalized):")
+    print(y.value_counts(normalize=True))
+    print("==============================\n")
+
+    # --- train model ---
+    rf_model.fit(X, y)
+    y_pred = rf_model.predict(X_test)
+
+    # --- Compute metrics ---
+    accuracy = accuracy_score(y_test, y_pred)
+
+    roc_auc = None
+    if hasattr(rf_model, "predict_proba") and len(rf_model.classes_) == 2:
+        y_prob = rf_model.predict_proba(X_test)[:, 1]
+        roc_auc = roc_auc_score(y_test, y_prob)
+
+    report = classification_report(y_test, y_pred)
+
+    # --- Prepare output directory ---
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    today = dt.datetime.today().strftime("%Y-%m-%d")
+    model_path = out_dir / f"rf_{target}_{today}.pkl"
+
+    # --- Save model ---
+    joblib.dump(rf_model, model_path)
+    print(f"Saved trained model to: {model_path}")
+
+    # --- Save model info ---
+    info_path = out_dir / f"rf_{target}_{today}_info.txt"
+
+    with open(info_path, "w", encoding="utf-8") as f:
+        f.write("=== RANDOM FOREST MODEL INFO ===\n\n")
+        f.write(f"Target variable: {target}\n")
+        f.write(f"Model path: {model_path}\n")
+        f.write(f"Date trained: {today}\n\n")
+
+        f.write("=== PARAMETERS ===\n")
+        for k, v in rf_model.get_params().items():
+            f.write(f"{k}: {v}\n")
+
+        f.write("\n=== PERFORMANCE (TEST SET) ===\n")
+        f.write(report)
+        f.write(f"\nAccuracy: {accuracy:.4f}\n")
+
+        if roc_auc is not None:
+            f.write(f"ROC-AUC: {roc_auc:.4f}\n")
+        else:
+            f.write("ROC-AUC: Not computed (non-binary target)\n")
+
+    print(f"Saved model info to: {info_path}")
+
+    CM_path = out_dir / f"confusion_{target}_{today}.png"
+    importances_path = out_dir / f"importances_{target}_{today}.png"
+    save_confusion_matrix(y_test, y_pred, CM_path)
+    save_importances(rf_model, importances_path)
+
+
+# --- loader ---
 
 
 def load_dataset(
@@ -55,61 +146,32 @@ def load_dataset(
     return df_train, df_test
 
 
-def train_rf_model(
-    df_train: pd.DataFrame,
-    df_test: pd.DataFrame,
-    target: str,
-    rf_model: RandomForestClassifier,
-    out_dir: Path,
-) -> None:
-    """
-    Train a Random Forest classifier for a single target column and save the model.
-    """
+# --- plot helpers ---
 
-    feature_cols = [c for c in df_train.columns if c not in target]
 
-    X = df_train[feature_cols].copy()
-    y = df_train[target].copy()
-    X_test = df_test[feature_cols].copy()
-    y_test = df_test[target].copy()
+def save_confusion_matrix(y_test, y_pred, filename="confusion_matrix.png"):
+    fig, ax = plt.subplots(figsize=(8, 6))
 
-    uniq = sorted(y.dropna().unique())
-    print("\n==============================")
-    print(f"Unique values in target: {uniq}")
-    print("Target distribution (normalized):")
-    print(y.value_counts(normalize=True))
-    print("==============================\n")
+    ConfusionMatrixDisplay.from_predictions(y_test, y_pred, ax=ax, colorbar=False)
+    ax.set_title("RF model")
+    plt.tight_layout()
+    fig.savefig(filename, dpi=300)
 
-    rf_model.fit(X, y)
 
-    y_pred = rf_model.predict(X_test)
+def save_importances(rf_model, filename):
+    model_features = rf_model.feature_names_in_
+    importances = rf_model.feature_importances_
 
-    roc_auc = None
-    if hasattr(rf_model, "predict_proba") and len(rf_model.classes_) == 2:
-        y_prob = rf_model.predict_proba(X_test)[:, 1]
-        roc_auc = roc_auc_score(y_test, y_prob)
+    idx = np.argsort(importances)
+    sorted_features = model_features[idx]
+    sorted_importances = importances[idx]
 
-    accuracy = accuracy_score(y_test, y_pred)
-
-    print("Model performance on test set:")
-    print(f"Accuracy: {accuracy:.3f}")
-    if roc_auc is not None:
-        print(f"ROC-AUC:  {roc_auc:.3f}")
-    else:
-        print("ROC-AUC:  not computed (target is not binary in the expected way)")
-    print()
-
-    print("Classification report:")
-    print(classification_report(y_test, y_pred))
-    print()
-
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    today = dt.datetime.today().strftime("%Y-%m-%d")
-    model_path = out_dir / f"rf_{target}_{today}.pkl"
-
-    joblib.dump(rf_model, model_path)
-    print(f"Saved trained model to: {model_path}")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plt.barh(sorted_features, sorted_importances, color="steelblue")
+    plt.xlabel("Feature Importance")
+    plt.title("Random Forest Feature Importances")
+    plt.tight_layout()
+    fig.savefig(filename, dpi=300)
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ from .build_explainer import build_explainer
 from .recommendations import DiceRecommender
 from .risk import RiskEvaluator
 
-explainer_profile = type[
+explainer_types = type[
     RandomExplainerProfile | GeneticExplainerProfile | GradientExplainerProfile
 ]
 
@@ -19,11 +19,11 @@ explainer_profile = type[
 class DiceCFPipeline:
     def __init__(
         self,
-        system_config: SystemConfig,
-        explainer_profile: explainer_profile,
+        config: SystemConfig,
+        explainer_profile: explainer_types,
         predictor: RandomForestClassifier,
     ):
-        self.system_config = system_config
+        self.config = config
         self.explainer_profile = explainer_profile
         self.predictor = predictor
         self.explainer = None  # assigned when during run
@@ -31,15 +31,16 @@ class DiceCFPipeline:
 
         self.risk_evaluator = RiskEvaluator(
             model=self.predictor,
-            feature_cols=self.system_config.feature_cols,
-            target_factor=self.system_config.target_factor,
+            feature_cols=self.config.feature_cols,
+            target_factor=self.config.target_factor,
         )
 
         self.recommender = DiceRecommender(
-            feature_cols=self.system_config.feature_cols,
-            target=self.system_config.target,
+            feature_cols=self.config.feature_cols,
+            target=self.config.target,
         )
 
+    # for future use - send to front end
     def process_single(self, df, query_instance):
         cf_result = self.run(df, query_instance)
         annotated = self.annotate(query_instance, cf_result.final_cfs_df)
@@ -47,6 +48,7 @@ class DiceCFPipeline:
         formatted = self.format_recommendations(query_instance, recs)
         return annotated, recs, formatted
 
+    # for testing
     def process_batch(self, df, query_instances):
         all_annotated = []
         all_recs = []
@@ -71,7 +73,7 @@ class DiceCFPipeline:
     def run(self, df: pd.DataFrame, query_instances: pd.DataFrame):
         # build explainer model that generates CF
         self.explainer = build_explainer(
-            config=self.system_config,
+            config=self.config,
             predictor_model=self.predictor,
             df=df,
             explainer_method=self.explainer_profile.method,

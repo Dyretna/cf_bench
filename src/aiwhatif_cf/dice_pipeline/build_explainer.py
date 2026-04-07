@@ -31,11 +31,13 @@ def build_explainer(config: SystemConfig, predictor_model, df, explainer_method)
         continuous_features=config.continuous_features,
         outcome_name=config.target,
     )
+
     dice_model = dice_ml.Model(
         model=predictor_model,
         backend=config.backend,
         model_type=config.model_type,
     )
+
     return dice_ml.Dice(
         dice_data,
         dice_model,
