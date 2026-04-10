@@ -124,11 +124,11 @@ class SystemConfig:
             "slprl",
             "paccnois",
             "bmi",
-            # "gndr",
+            "gndr",
             "dosprt",
         ]
     )
-    # immutable_cols: list[str] = field(default_factory=lambda: ["gndr"])
+    immutable_cols: list[str] = field(default_factory=lambda: ["gndr"])
     continuous_features: list[str] = field(default_factory=lambda: ["bmi"])
 
     backend: str = "sklearn"
@@ -137,8 +137,7 @@ class SystemConfig:
 
     def __post_init__(self):
         self.features_to_vary = [
-            c
-            for c in self.feature_cols  # if c not in self.immutable_cols
+            c for c in self.feature_cols if c not in self.immutable_cols
         ]
 
     def __str__(self):

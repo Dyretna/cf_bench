@@ -1,6 +1,6 @@
-import pandas as pd
-import numpy as np
 from pathlib import Path
+
+import pandas as pd
 
 
 def main():
@@ -9,7 +9,6 @@ def main():
 
     full_clean_path = project_root / "data" / "ess_clean_full.csv"
     model_ready_path = project_root / "data" / "ess_model_ready.csv"
-
 
     df = pd.read_csv(input_path)
     print(f"Read file: {input_path}")
@@ -22,7 +21,6 @@ def main():
         print("New shape:", df.shape)
         print()
 
-
     if {"height", "weighta"}.issubset(df.columns):
         df["bmi"] = df["weighta"] / (df["height"] / 100) ** 2
 
@@ -34,8 +32,9 @@ def main():
         print(f"Rows before BMI filtering: {before_bmi}, after filtering: {after_bmi}")
         print()
     else:
-        raise ValueError("Required columns for BMI calculation not found: 'height' and 'weighta'.")
-
+        raise ValueError(
+            "Required columns for BMI calculation not found: 'height' and 'weighta'."
+        )
 
     outcome_cols = ["hltprhc", "hltprhb", "hltprdi"]
     missing_outcomes = [c for c in outcome_cols if c not in df.columns]
@@ -78,7 +77,6 @@ def main():
     if missing_features:
         raise ValueError(f"Missing feature columns: {missing_features}")
 
-
     cols_for_model = feature_cols + outcome_cols
     df_model = df[cols_for_model].copy()
 
@@ -86,7 +84,6 @@ def main():
     df_model = df_model.dropna()
     print("Rows after dropna:", df_model.shape[0])
     print()
-
 
     df.to_csv(full_clean_path, index=False)
     print(f"Saved fully cleaned dataset to: {full_clean_path}")

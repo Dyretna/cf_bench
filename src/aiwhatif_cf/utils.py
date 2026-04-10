@@ -20,8 +20,6 @@ def build_annotated_batch(query_instances, all_annotated, target):
     ):
         # Original instance as DataFrame
         original_df = pd.DataFrame([original_row])
-
-        # Annotated CFs for this instance
         cf_risk = all_annotated[i]
 
         # Risk values (same for all CFs)
@@ -50,6 +48,13 @@ def build_annotated_batch(query_instances, all_annotated, target):
             cf_row = row.to_dict()
             cf_row["query_index"] = idx
             cf_row["cf_id"] = f"cf_{j + 1}"
+
+            # clear (empty string) all values that's not changing
+            for col in original_row.keys():
+                if col in cf_row:
+                    if cf_row[col] == original_row[col]:
+                        cf_row[col] = ""
+
             rows.append(cf_row)
 
     annotated_batch = pd.DataFrame(rows)
