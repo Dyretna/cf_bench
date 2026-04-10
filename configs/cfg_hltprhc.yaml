@@ -1,0 +1,9 @@
+test_path: "data/07_from_HL/ete.csv"
+target: "hltprhc"
+model_path: "models/rf_HL_04_09.pkl"
+output_dir: "cf_outputs"
+
+explainer_profile: "random"   # or "genetic"
+
+use_original_index: False
+n_query_instances: 20
