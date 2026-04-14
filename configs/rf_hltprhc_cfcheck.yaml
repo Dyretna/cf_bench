@@ -1,4 +1,4 @@
-test_path: "data/07_from_HL/cfcheck.csv"
+test_path: "data/cfcheck.csv"
 target: "hltprhc"
 model_path: "models/rf_HL_04_09.pkl"
 output_dir: "cf_outputs"
