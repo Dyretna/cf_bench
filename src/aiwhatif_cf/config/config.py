@@ -124,11 +124,20 @@ class SystemConfig:
             "slprl",
             "paccnois",
             "bmi",
-            # "gndr",
             "dosprt",
         ]
     )
     # immutable_cols: list[str] = field(default_factory=lambda: ["gndr"])
+    ordinal_features: list[str] = field(
+        default_factory=lambda: [
+            "etfruit",
+            "eatveg",
+            "cgtsmok",
+            "alcfreq",
+            "slprl",
+            "paccnoisdosprt",
+        ]
+    )
     continuous_features: list[str] = field(default_factory=lambda: ["bmi"])
 
     backend: str = "sklearn"

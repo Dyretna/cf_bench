@@ -1,0 +1,8 @@
+test_path: "data/07_from_HL/cfcheck.csv"
+target: "hltprhc"
+model_path: "models/xgboost.pkl"
+output_dir: "cf_outputs"
+
+explainer_profile: "genetic"   # "random" or "genetic"
+
+n_query_instances: 20

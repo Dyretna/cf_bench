@@ -104,8 +104,10 @@ def export_batch_results(
     report = classification_report(y_true, y_pred)
     roc_auc = roc_auc_score(y_true, y_pred)
 
-    with open(output_dir / f"rf_{config.target}_info.txt", "w", encoding="utf-8") as f:
-        f.write("=== RANDOM FOREST MODEL INFO ===\n\n")
+    with open(
+        output_dir / f"model_{config.target}_info.txt", "w", encoding="utf-8"
+    ) as f:
+        f.write("=== MODEL INFO ===\n\n")
         f.write("=== PARAMETERS ===\n")
         for k, v in rf_model.get_params().items():
             f.write(f"{k}: {v}\n")

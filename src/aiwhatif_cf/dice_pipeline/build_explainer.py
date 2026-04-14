@@ -1,6 +1,31 @@
 import dice_ml
+import pandas as pd
 
 from ..config import SystemConfig
+
+
+class SanitizedModel:
+    def __init__(self, model, train_df):
+        self.model = model
+        self.train_dtypes = train_df.dtypes.to_dict()
+
+    def _sanitize(self, df):
+        df = df.copy()
+        for col, dtype in self.train_dtypes.items():
+            if col in df.columns:
+                try:
+                    df[col] = df[col].astype(dtype)
+                except Exception:
+                    df[col] = pd.to_numeric(df[col], errors="coerce").astype(dtype)
+        return df
+
+    def predict_proba(self, df):
+        df = self._sanitize(df)
+        return self.model.predict_proba(df)
+
+    def predict(self, df):
+        df = self._sanitize(df)
+        return self.model.predict(df)
 
 
 def build_explainer(config: SystemConfig, predictor_model, df, explainer_method):
@@ -32,10 +57,12 @@ def build_explainer(config: SystemConfig, predictor_model, df, explainer_method)
         outcome_name=config.target,
     )
 
+    sanitized = SanitizedModel(predictor_model, df)
+
     dice_model = dice_ml.Model(
-        model=predictor_model,
-        backend=config.backend,
-        model_type=config.model_type,
+        model=sanitized,
+        backend=config.backend,  # sklearn
+        model_type=config.model_type,  # classifer
     )
 
     return dice_ml.Dice(

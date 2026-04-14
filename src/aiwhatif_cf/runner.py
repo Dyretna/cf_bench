@@ -28,19 +28,16 @@ def run_pipeline(cfg):
     config = SystemConfig(target=cfg["target"])
     model = joblib.load(cfg["model_path"])
 
-    df = pd.read_csv(
-        cfg["test_path"], index_col=0 if cfg.get("use_original_index") else None
-    )
-    df = df[config.feature_cols + [cfg["target"]]]
+    dtype_map = {
+        **{col: int for col in config.ordinal_features},
+        **{col: float for col in config.continuous_features},
+    }
 
-    if cfg.get("use_original_index"):
-        topn = df.head(cfg["n_query_instances"])
-        original_index = topn.index.copy()
-        query_df = topn.drop(columns=[cfg["target"]]).reset_index(drop=True)
-    else:
-        q = df.loc[df[cfg["target"]] == 1, config.feature_cols]
-        query_df = q.head(cfg["n_query_instances"])
-        original_index = None
+    df = pd.read_csv(cfg["test_path"], dtype=dtype_map)
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+    df = df[config.feature_cols + [cfg["target"]]]
+    query_df = df.head(cfg["n_query_instances"]).drop(columns=config.target)
+    print(query_df.info())
 
     profile_cls = PROFILE_MAP[cfg["explainer_profile"]]
     explainer_profile = profile_cls(features_to_vary=config.features_to_vary)
@@ -57,10 +54,6 @@ def run_pipeline(cfg):
     )
 
     annotated_batch = build_annotated_batch(query_df, all_annotated, cfg["target"])
-
-    if original_index is not None:
-        index_map = dict(enumerate(original_index))
-        annotated_batch["query_index"] = annotated_batch["query_index"].map(index_map)
 
     print("\n=== Annoted Batch ===")
     print(annotated_batch)
