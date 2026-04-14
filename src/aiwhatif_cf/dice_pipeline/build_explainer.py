@@ -5,11 +5,25 @@ from ..config import SystemConfig
 
 
 class SanitizedModel:
+    """
+    A generic model wrapper that enforces consistent input dtypes.
+
+    DiCE generates synthetic counterfactual samples that may contain mixed or
+    incorrect dtypes (e.g., 'object' instead of numeric). Some models such as
+    XGBoost require strict numeric dtypes and will fail otherwise.
+
+    This wrapper:
+    - stores the dtypes from the training DataFrame
+    - sanitizes all incoming DataFrames to match those dtypes
+    - works for any sklearn-compatible model without special-casing
+    """
+
     def __init__(self, model, train_df):
         self.model = model
         self.train_dtypes = train_df.dtypes.to_dict()
 
-    def _sanitize(self, df):
+    def _sanitize(self, df) -> pd.DataFrame:
+        """Casts columns in df to the stored training dtypes."""
         df = df.copy()
         for col, dtype in self.train_dtypes.items():
             if col in df.columns:
@@ -20,12 +34,19 @@ class SanitizedModel:
         return df
 
     def predict_proba(self, df):
+        """Sanitizes df and forwards the call to the underlying model."""
         df = self._sanitize(df)
         return self.model.predict_proba(df)
 
     def predict(self, df):
+        """Sanitizes df and forwards the call to the underlying model."""
         df = self._sanitize(df)
         return self.model.predict(df)
+
+
+# ------------------------------------------------------------------------------
+#  the builder
+# ------------------------------------------------------------------------------
 
 
 def build_explainer(config: SystemConfig, predictor_model, df, explainer_method):
