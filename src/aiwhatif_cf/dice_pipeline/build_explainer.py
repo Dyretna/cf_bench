@@ -44,9 +44,9 @@ class SanitizedModel:
         return self.model.predict(df)
 
 
-# ------------------------------------------------------------------------------
-#  the builder
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------
+#  Build DiCE explainer for both sklearn and TF2 backends
+# ----------------------------------------------------------------------
 
 
 def build_explainer(config: SystemConfig, predictor_model, df, explainer_method):
@@ -78,10 +78,19 @@ def build_explainer(config: SystemConfig, predictor_model, df, explainer_method)
         outcome_name=config.target,
     )
 
-    sanitized = SanitizedModel(predictor_model, df)
+    # Decide how to present the model to DiCE based on backend
+    if config.backend == "sklearn":
+        # Wrap sklearn-like models to sanitize dtypes
+        model_for_dice = SanitizedModel(predictor_model, df)
+    elif config.backend == "TF2":
+        # For Keras/TF2 models, pass the raw model (callable)
+        model_for_dice = predictor_model
+
+    else:
+        raise ValueError(f"Unsupported backend for DiCE: {config.backend}")
 
     dice_model = dice_ml.Model(
-        model=sanitized,
+        model=model_for_dice,
         backend=config.backend,  # sklearn
         model_type=config.model_type,  # classifer
     )

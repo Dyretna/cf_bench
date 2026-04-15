@@ -1,8 +1,15 @@
+# paths
 test_path: "data/cfcheck.csv"
-target: "hltprhc"
-model_path: "models/rf_HL_04_09.pkl"
+model_path: "models/rf_hltprhc.pkl"
 output_dir: "cf_outputs"
 
-explainer_profile: "random"   # or "genetic"
+# system config
+target: "hltprhc"
+backend: "sklearn"
 
+# profile, eg. DiCE model
+explainer_profile: "random"   # "random" or "genetic"
+
+
+# if on large dataset, first 20
 n_query_instances: 20

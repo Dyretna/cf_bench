@@ -114,6 +114,8 @@ from typing import Optional
 @dataclass
 class SystemConfig:
     target: str
+    backend: str
+    model_type: str = "classifier"
 
     feature_cols: list[str] = field(
         default_factory=lambda: [
@@ -139,9 +141,6 @@ class SystemConfig:
         ]
     )
     continuous_features: list[str] = field(default_factory=lambda: ["bmi"])
-
-    backend: str = "sklearn"
-    model_type: str = "classifier"
     target_factor: float = 0.5  # multiplier for RiskEvaluator
 
     def __post_init__(self):

@@ -3,6 +3,96 @@ from pathlib import Path
 import pandas as pd
 from sklearn.metrics import classification_report, roc_auc_score
 
+from .dice_pipeline import BaseRiskEvaluator, DiceRecommender
+
+
+def annotate_all(
+    risk_evaluator: "BaseRiskEvaluator", cf_result, query_df: pd.DataFrame
+) -> list[pd.DataFrame]:
+    """
+    Annotate all counterfactual batches.
+
+    Parameters
+    ----------
+    risk_evaluator : RiskEvaluator
+        Evaluator used to compute risk annotations.
+    cf_result : dice_ml.CounterfactualExamples
+        Counterfactual generation output.
+    query_df : pandas.DataFrame
+        Original query instances.
+
+    Returns
+    -------
+    list[pandas.DataFrame]
+        Annotated counterfactuals per query instance.
+    """
+    annotated_batches = []
+
+    for i, cf in enumerate(cf_result.cf_examples_list):
+        qi = query_df.iloc[[i]]
+        cf_df = cf.final_cfs_df
+        annotated_batches.append(risk_evaluator.annotate(qi, cf_df))
+
+    return annotated_batches
+
+
+def recommend_all(
+    recommender: "DiceRecommender", annotated_list, query_df
+) -> list[list[dict]]:
+    """
+    Generate recommendations for annotated counterfactuals.
+
+    Parameters
+    ----------
+    recommender : DiceRecommender
+        Recommender used to produce suggestions.
+    annotated_list : list[pandas.DataFrame]
+        Annotated counterfactuals.
+    query_df : pandas.DataFrame
+        Original query instances.
+
+    Returns
+    -------
+    list[list[dict]]
+        Recommendations per query instance.
+    """
+    all_recs = []
+
+    for i, annotated in enumerate(annotated_list):
+        qi = query_df.iloc[[i]]
+        all_recs.append(recommender.get_recommendations(qi, annotated))
+
+    return all_recs
+
+
+def format_all(recommender: "DiceRecommender", recs_list, query_df) -> list[str]:
+    """
+    Format recommendation outputs for all query instances.
+
+    Parameters
+    ----------
+    recommender : DiceRecommender
+        Recommender providing formatting utilities.
+    recs_list : list
+        Raw recommendations.
+    query_df : pandas.DataFrame
+        Original query instances.
+
+    Returns
+    -------
+    list
+        Formatted recommendation outputs.
+    """
+    all_formatted = []
+
+    for i, recs in enumerate(recs_list):
+        qi = query_df.iloc[[i]]
+        all_formatted.append(
+            recommender.format_recommendations(qi, recs, true_outcome=1)
+        )
+
+    return all_formatted
+
 
 def build_annotated_batch(query_instances, all_annotated, target):
     """

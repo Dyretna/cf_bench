@@ -1,14 +1,15 @@
 # paths
 test_path: "data/cfcheck.csv"
-model_path: "models/xgboost.pkl"
+model_path: "models/nn_hltprhc.keras"
 output_dir: "cf_outputs"
+scaler_path: "models/scaler.pkl"
 
 # system config
 target: "hltprhc"
-backend: "sklearn"
+backend: "TF2"
 
 # profile, eg. DiCE model
-explainer_profile: "random"   # "random" or "genetic"
+explainer_profile: "genetic"   # "random", "genetic"
 
 # if on large dataset, first 20
 n_query_instances: 20

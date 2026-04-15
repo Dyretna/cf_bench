@@ -227,9 +227,10 @@ architechture_discussion.md
 examples.dice_theory
 TODO.md
 .CF-Transitions*
-
-# rf models (too big)
-*.pkl
-
 .legacy
+
+# models (too big)
+*.pkl
+*.keras
+
 /cf_outputs

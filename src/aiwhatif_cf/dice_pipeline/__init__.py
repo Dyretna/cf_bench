@@ -1,14 +1,14 @@
 from .build_explainer import build_explainer
-from .dice_pipeline import DiceCFPipeline
 from .recommendations import DiceRecommender
-from .risk import RiskEvaluator
+from .risk import BaseRiskEvaluator, build_risk_evaluator
 from .visualizations import make_cf_heatmaps, save_heatmap
 
 __all__ = [
     "build_explainer",
     "DiceCFPipeline",
     "DiceRecommender",
-    "RiskEvaluator",
+    "BaseRiskEvaluator",
+    "build_risk_evaluator",
     "save_heatmap",
     "make_cf_heatmaps",
 ]
