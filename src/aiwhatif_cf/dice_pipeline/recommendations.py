@@ -169,7 +169,11 @@ class DiceRecommender:
 
             lines.append("Changes:")
             for feat, old, new in changes:
-                lines.append(f"  - {feat}: {old:.3f} → {new:.3f}")
+                # Format based on whether values are numeric or string
+                if isinstance(old, (int, float)) and isinstance(new, (int, float)):
+                    lines.append(f"  - {feat}: {old:.3f} → {new:.3f}")
+                else:
+                    lines.append(f"  - {feat}: {old} → {new}")
 
             lines.append("")
 

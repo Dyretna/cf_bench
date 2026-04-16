@@ -7,7 +7,9 @@ from .dice_pipeline import BaseRiskEvaluator, DiceRecommender
 
 
 def annotate_all(
-    risk_evaluator: "BaseRiskEvaluator", cf_result, query_df: pd.DataFrame
+    risk_evaluator: "BaseRiskEvaluator",
+    cf_results: list,  # Changed: now a list of CounterfactualExamples
+    query_df: pd.DataFrame,
 ) -> list[pd.DataFrame]:
     """
     Annotate all counterfactual batches.
@@ -16,8 +18,8 @@ def annotate_all(
     ----------
     risk_evaluator : RiskEvaluator
         Evaluator used to compute risk annotations.
-    cf_result : dice_ml.CounterfactualExamples
-        Counterfactual generation output.
+    cf_results : list[dice_ml.CounterfactualExamples]
+        List of counterfactual generation outputs (one per query instance).
     query_df : pandas.DataFrame
         Original query instances.
 
@@ -28,9 +30,11 @@ def annotate_all(
     """
     annotated_batches = []
 
-    for i, cf in enumerate(cf_result.cf_examples_list):
+    # Iterate over the list of CounterfactualExplanations objects
+    for i, cf in enumerate(cf_results):
         qi = query_df.iloc[[i]]
-        cf_df = cf.final_cfs_df
+        # Access cf_examples_list[0] since we generate one query at a time
+        cf_df = cf.cf_examples_list[0].final_cfs_df
         annotated_batches.append(risk_evaluator.annotate(qi, cf_df))
 
     return annotated_batches

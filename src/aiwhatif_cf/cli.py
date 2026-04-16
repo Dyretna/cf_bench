@@ -2,7 +2,7 @@ import argparse
 
 import yaml
 
-from .runner import run_pipeline
+from .dice_batch_runner import run_pipeline
 
 
 def main():

@@ -1,9 +1,12 @@
-from .config import (
-    GeneticExplainerProfile,
-    GradientExplainerProfile,
-    RandomExplainerProfile,
-    SystemConfig,
-)
+"""
+Configuration module for counterfactual explanation pipelines.
+
+This module defines configuration classes and explainer profiles used by the
+DiCE-based counterfactual generation system. It provides a unified interface for
+specifying model targets, feature metadata, and explainer-specific parameters.
+"""
+
+from .config import SystemConfig
 from .paths import (  # train; test
     CF_OUTPUTS,
     DATA_DIR,
@@ -15,13 +18,21 @@ from .paths import (  # train; test
     TRAIN_DATA_PATH_HB,
     TRAIN_DATA_PATH_HC,
 )
+from .profiles import (
+    BaseExplainerProfile,
+    GeneticExplainerProfile,
+    GradientExplainerProfile,
+    RandomExplainerProfile,
+)
 
 __all__ = [
     # configs
     "SystemConfig",
-    "RandomExplainerProfile",
+    # profiles
+    "BaseExplainerProfile",
     "GeneticExplainerProfile",
     "GradientExplainerProfile",
+    "RandomExplainerProfile",
     # paths
     "MODELS_DIR",
     "MODEL_PATH_HB",
