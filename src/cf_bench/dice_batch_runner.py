@@ -1,4 +1,5 @@
 import datetime as dt
+import json
 import logging
 import time
 import warnings
@@ -18,6 +19,7 @@ from .config import (
 )
 from .dice_adapters import DiceRecommender, build_explainer, build_risk_evaluator
 from .dice_adapters.build_explainer import SanitizedModel
+from .model_info_extractors import extract_model_info
 from .utils import annotate_all, build_annotated_batch, format_all, recommend_all
 
 logger = logging.getLogger(__name__)
@@ -295,16 +297,46 @@ def run_pipeline(cfg):
             f.write("\n\n" + "=" * 80 + "\n\n")
 
     # --- Save model info and performance ---
+    # Extract model information dynamically
+    model_info = extract_model_info(model, config)
+
+    # Save as JSON for machine readability
+    model_info_json_path = output_dir / f"model_{config.target}_info.json"
+    with open(model_info_json_path, "w", encoding="utf-8") as f:
+        json.dump(model_info, f, indent=2, default=str)
+
+    # Save human-readable version
     model_info_path = output_dir / f"model_{config.target}_info.txt"
     with open(model_info_path, "w", encoding="utf-8") as f:
         f.write("=== MODEL INFO ===\n\n")
-        if config.backend == "sklearn":
-            f.write("=== Sklearn model params ===\n")
-            for k, v in model.get_params().items():
-                f.write(f"{k}: {v}\n")
+        f.write(f"Model Type: {model_info['model_type']}\n")
+        f.write(f"Model Class: {model_info['model_class']}\n")
+        f.write(f"Model Module: {model_info['model_module']}\n\n")
+
+        # Handle Keras models with summary
+        if "summary" in model_info:
+            f.write("Model Summary:\n")
+            f.write(model_info["summary"])
+            f.write(f"\nNumber of Layers: {model_info.get('num_layers', 'N/A')}\n")
+            f.write(f"Total Parameters: {model_info.get('total_params', 'N/A')}\n")
         else:
-            f.write("Keras model summary:\n")
-            model.summary(print_fn=lambda x: f.write(x + "\n"))
+            # For non-Keras models, write parameters
+            f.write("Parameters:\n")
+            params = model_info.get("params", {})
+            for k, v in params.items():
+                f.write(f"  {k}: {v}\n")
+
+        # Add feature importances if available
+        if "feature_importances" in model_info:
+            f.write("\nFeature Importances:\n")
+            # Sort by importance (descending)
+            sorted_features = sorted(
+                model_info["feature_importances"].items(),
+                key=lambda x: x[1],
+                reverse=True,
+            )
+            for feat, importance in sorted_features:
+                f.write(f"  {feat}: {importance:.4f}\n")
 
         f.write("\n=== PERFORMANCE ===\n")
         f.write(report)
