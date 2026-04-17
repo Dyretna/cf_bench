@@ -122,6 +122,7 @@ def run_pipeline(cfg):
         ordinal_allowed_values=config.ordinal_allowed_values,
         total_CFs=cfg["total_CFs"],
         stopping_threshold=cfg["stopping_threshold"],
+        use_permitted_range=cfg.get("use_permitted_range", True),  # Default to True
     )
 
     # --------------------------------------------------------------------------

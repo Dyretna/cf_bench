@@ -12,3 +12,4 @@ backend: "sklearn"
 explainer_profile: "genetic"   # "random" or "genetic"
 total_CFs: 10
 stopping_threshold: 0.9
+use_permitted_range: true  # XGBoost with genetic algorithm handles permitted range well

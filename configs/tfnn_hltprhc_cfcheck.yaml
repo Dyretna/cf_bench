@@ -13,3 +13,4 @@ backend: "TF2"
 explainer_profile: "gradient"
 total_cfs: 20
 stopping_threshold: None
+use_permitted_range: true  # Neural network with gradient descent handles permitted range well

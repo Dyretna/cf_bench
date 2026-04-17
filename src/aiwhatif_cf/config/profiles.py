@@ -214,6 +214,7 @@ class BaseExplainerProfile(ABC):
     features_to_vary: Optional[List[str]] = None
     permitted_range: Optional[Dict] = None
     desired_class: int = 0
+    use_permitted_range: bool = True  # Enable/disable permitted_range constraints
 
     @property
     @abstractmethod
@@ -269,6 +270,13 @@ class BaseExplainerProfile(ABC):
             DiCE parameters with consistent dtypes in permitted_range
         """
         params = self.to_cf_params().copy()
+
+        # Only build permitted_range if enabled
+        if not self.use_permitted_range:
+            logger.info("Permitted range disabled - skipping constraint generation")
+            # Remove permitted_range from params if it exists
+            params.pop("permitted_range", None)
+            return params
 
         # Build directional ranges (returns strings for ordinals)
         directional = build_directional_ranges(
