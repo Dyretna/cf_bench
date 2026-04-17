@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 from sklearn.metrics import classification_report, roc_auc_score
 
-from .dice_pipeline import BaseRiskEvaluator, DiceRecommender
+from .dice_adapters import BaseRiskEvaluator, DiceRecommender
 
 
 def annotate_all(

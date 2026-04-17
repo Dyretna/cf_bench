@@ -16,8 +16,8 @@ from .config import (
     RandomExplainerProfile,
     SystemConfig,
 )
-from .dice_pipeline import DiceRecommender, build_explainer, build_risk_evaluator
-from .dice_pipeline.build_explainer import SanitizedModel
+from .dice_adapters import DiceRecommender, build_explainer, build_risk_evaluator
+from .dice_adapters.build_explainer import SanitizedModel
 from .utils import annotate_all, build_annotated_batch, format_all, recommend_all
 
 logger = logging.getLogger(__name__)

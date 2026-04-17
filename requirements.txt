@@ -1,7 +1,9 @@
--e git+ssh://git@github.com/Dyretna/ai_counterfactuals_tests@8beaa39e8613a82510aee9e02b35f424e68204e4#egg=ai_counterfactuals_tests
+absl-py==2.4.0
+-e git+ssh://git@github.com/Dyretna/ai_counterfactuals_tests@a3a9e6c6428413f39dc770dcceaf0d9ab42bdeec#egg=ai_counterfactuals_tests
 alibi==0.9.6
 annotated-types==0.7.0
 asttokens==3.0.1
+astunparse==1.6.3
 attrs==23.2.0
 blis==0.7.11
 catalogue==2.0.10
@@ -23,8 +25,13 @@ dill==0.3.9
 distlib==0.4.0
 executing==2.2.1
 filelock==3.25.2
+flatbuffers==25.12.19
 fonttools==4.61.1
 fsspec==2025.12.0
+gast==0.7.0
+google-pasta==0.2.0
+grpcio==1.80.0
+h5py==3.14.0
 hf-xet==1.2.0
 huggingface-hub==0.36.0
 identify==2.6.18
@@ -40,9 +47,11 @@ jsonschema==4.25.1
 jsonschema-specifications==2025.9.1
 jupyter_client==8.8.0
 jupyter_core==5.9.1
+keras==3.14.0
 kiwisolver==1.4.9
 langcodes==3.5.1
 lazy_loader==0.4
+libclang==18.1.1
 lightgbm==4.6.0
 llvmlite==0.42.0
 markdown-it-py==4.0.0
@@ -50,13 +59,16 @@ MarkupSafe==3.0.3
 matplotlib==3.10.8
 matplotlib-inline==0.2.1
 mdurl==0.1.2
+ml_dtypes==0.5.4
 murmurhash==1.0.15
+namex==0.1.0
 nest-asyncio==1.6.0
 networkx==3.6.1
 nodeenv==1.10.0
 numba==0.59.1
 numpy==1.26.4
-nvidia-nccl-cu12==2.28.9
+opt_einsum==3.4.0
+optree==0.19.0
 packaging==25.0
 pandas==2.3.3
 parso==0.8.6
@@ -66,6 +78,7 @@ platformdirs==4.9.4
 pre_commit==4.5.1
 preshed==3.0.12
 prompt_toolkit==3.0.52
+protobuf==7.34.1
 psutil==7.2.2
 ptyprocess==0.7.0
 pure_eval==0.2.3
@@ -101,6 +114,8 @@ spacy-loggers==1.0.5
 spacy-lookups-data==1.0.5
 srsly==2.5.2
 stack-data==0.6.3
+tensorflow_cpu==2.21.0
+termcolor==3.3.0
 thinc==8.2.5
 threadpoolctl==3.6.0
 tifffile==2025.12.20
