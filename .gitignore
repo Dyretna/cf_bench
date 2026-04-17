@@ -219,16 +219,12 @@ __marimo__/
 *.zip
 
 # private documentation
-docs/.private
-LINKS.md
-CF_and_evaluation_frameworks.md
-devlog.ipynb
-architechture_discussion.md
-.articles
-examples.dice_theory
-TODO.md
-.CF-Transitions*
 .legacy
+docs/.private
+docs/.articles
+devlog.ipynb
+LINKS.md
+TODO.md
 
 # models (too big)
 *.pkl

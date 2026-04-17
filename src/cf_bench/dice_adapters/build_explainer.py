@@ -82,12 +82,20 @@ class SanitizedModel:
         return df
 
     def predict_proba(self, df):
-        """Sanitize input and forward to model.predict_proba."""
+        """
+        Sanitize input and forward to model.predict_proba.
+
+        _sanitize() handles all dtype conversions (strings → numeric).
+        """
         df_sanitized = self._sanitize(df)
         return self.model.predict_proba(df_sanitized)
 
     def predict(self, df):
-        """Sanitize input and forward to model.predict."""
+        """
+        Sanitize input and forward to model.predict.
+
+        _sanitize() handles all dtype conversions (strings → numeric).
+        """
         df_sanitized = self._sanitize(df)
         return self.model.predict(df_sanitized)
 
