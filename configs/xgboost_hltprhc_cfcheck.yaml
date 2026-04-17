@@ -9,6 +9,6 @@ target: "hltprhc"
 backend: "sklearn"
 
 # profile, eg. DiCE model
-explainer_profile: "random"   # "random" or "genetic"
+explainer_profile: "genetic"   # "random" or "genetic"
 total_CFs: 10
 stopping_threshold: 0.9

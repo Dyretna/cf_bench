@@ -81,16 +81,21 @@ class BaseRiskEvaluator(ABC):
         original_prob: float = self.compute_original_risk(query_instances)
         target_risk: float = original_prob * self.target_factor
 
-        counterfactuals["original_risk"] = original_prob
+        counterfactuals["risk_before"] = original_prob
         counterfactuals["target_risk"] = target_risk
-        counterfactuals["predicted_risk"] = self.compute_cf_risks(counterfactuals)
-        counterfactuals["meets_target_risk"] = (
-            counterfactuals["predicted_risk"] <= target_risk
+        counterfactuals["predicted_risk_after"] = self.compute_cf_risks(counterfactuals)
+        counterfactuals["valid"] = (
+            counterfactuals["predicted_risk_after"] <= target_risk
         )
 
         first_cols = ["query_index", "cf_id"]
-        other_cols = [c for c in counterfactuals.columns if c not in first_cols]
-        return counterfactuals[first_cols + other_cols]
+        risk_cols = ["valid", "risk_before", "predicted_risk_after", "target_risk"]
+        other_cols = [
+            c
+            for c in counterfactuals.columns
+            if c not in first_cols or c not in risk_cols
+        ]
+        return counterfactuals[first_cols + other_cols + risk_cols]
 
     @abstractmethod
     def _predict_proba(self, X: pd.DataFrame) -> np.ndarray:
