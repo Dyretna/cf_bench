@@ -17,10 +17,9 @@ from .config import (
     RandomExplainerProfile,
     SystemConfig,
 )
-from .dice_adapters import DiceRecommender, build_explainer, build_risk_evaluator
-from .dice_adapters.build_explainer import SanitizedModel
+from .dice_adapters import SanitizedModel, build_explainer, build_risk_evaluator
 from .model_info_extractors import extract_model_info
-from .utils import annotate_all, build_annotated_batch, format_all, recommend_all
+from .utils import annotate_all, build_annotated_batch
 
 logger = logging.getLogger(__name__)
 
@@ -202,13 +201,7 @@ def run_pipeline(cfg):
         target_factor=config.target_factor,
     )
 
-    recommender = DiceRecommender(
-        feature_cols=config.feature_cols,
-        target=config.target,
-    )
-
     all_annotated = annotate_all(risk_evaluator, cf_results, query_df)
-    all_recs = recommend_all(recommender, all_annotated, query_df)
 
     # ----------------------------------------------------------------------
     # Build annotated batch for export/inspection
@@ -237,16 +230,6 @@ def run_pipeline(cfg):
             scaler,
             config.feature_cols,
         )
-        all_recs = _inverse_scale_recommendations(
-            all_recs,
-            scaler,
-            config.feature_cols,
-        )
-
-    # Now we are in raw feature space for anything user-facing
-    all_formatted = format_all(
-        recommender, all_recs, query_df, model_input_df[config.target]
-    )
 
     # --- Predictions for performance export ---
     y_true, y_pred = _compute_predictions(config, model, model_input_df)
@@ -287,14 +270,6 @@ def run_pipeline(cfg):
         f.write(f"Min time: {min_cf_time:.2f}s\n")
         f.write(f"Max time: {max_cf_time:.2f}s\n")
         f.write(f"Number of instances: {len(cf_times)}\n")
-
-    # --- Save formatted recommendations ---
-    rec_path = output_dir / f"recs_{suffix}"
-    with open(rec_path, "w", encoding="utf-8") as f:
-        f.write("=== RECOMMENDATIONS ===\n\n")
-        for formatted in all_formatted:
-            f.write(formatted)
-            f.write("\n\n" + "=" * 80 + "\n\n")
 
     # --- Save model info and performance ---
     # Extract model information dynamically
