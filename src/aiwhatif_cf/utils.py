@@ -122,9 +122,15 @@ def build_annotated_batch(query_instances, all_annotated, target):
         original_df = pd.DataFrame([original_row])
         cf_risk = all_annotated[i]
 
-        # Risk values (same for all CFs)
+        # Risk values (same for all CFs) - extract scalar values
         risk_before = cf_risk["risk_before"].iloc[0]
         target_risk = cf_risk["target_risk"].iloc[0]
+
+        # Ensure we have scalar values, not Series
+        if isinstance(risk_before, pd.Series):
+            risk_before = risk_before.iloc[0]
+        if isinstance(target_risk, pd.Series):
+            target_risk = target_risk.iloc[0]
 
         # Outcome value
         outcome_value = original_df[target].iloc[0] if target in original_df else None

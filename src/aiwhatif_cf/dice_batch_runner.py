@@ -1,5 +1,6 @@
 import datetime as dt
 import logging
+import time
 import warnings
 from pathlib import Path
 
@@ -150,6 +151,8 @@ def run_pipeline(cfg):
     # --------------------------------------------------------------------------
     logger.info(f"Generating counterfactuals for {len(query_df)} instances...")
     cf_results = []
+    cf_times = []  # Track individual CF generation times
+
     for idx, row in query_df.iterrows():
         single_query = row.to_frame().T
 
@@ -168,11 +171,16 @@ def run_pipeline(cfg):
                 unique_vals = sorted(df_traning_for_dice[feat].unique())
                 logger.debug(f"  {feat}: {unique_vals}")
 
+        # Time CF generation for this instance
+        start_time = time.perf_counter()
         cf = explainer.generate_counterfactuals(
             query_instances=single_query,
             **explainer_profile.to_cf_params_for_row(row),
         )
+        end_time = time.perf_counter()
+
         cf_results.append(cf)
+        cf_times.append(end_time - start_time)
 
     # ---------------------------------------------------------------------------
     # Risk evaluation and recommendation generation
@@ -208,6 +216,17 @@ def run_pipeline(cfg):
         query_instances=query_df,
         all_annotated=all_annotated,
         target=cfg["target"],
+    )
+
+    # Add CF generation time per instance to annotated batch
+    # Only set timing for 'original' rows (one time per query instance)
+    # Round to 2 decimals for readability
+    time_mapping = {idx: round(time, 2) for idx, time in zip(query_df.index, cf_times)}
+    annotated_batch["cf_gen_time_sec"] = annotated_batch.apply(
+        lambda row: time_mapping.get(row["query_index"])
+        if row["cf_id"] == "original"
+        else None,
+        axis=1,
     )
 
     if scaler is not None:
@@ -250,11 +269,22 @@ def run_pipeline(cfg):
 
     suffix = f"{explainer_profile.method}_{config.target}.txt"
 
-    # --- Save config ---
+    # --- Save config with timing info ---
+    total_cf_time = sum(cf_times)
+    avg_cf_time = total_cf_time / len(cf_times) if cf_times else 0
+    min_cf_time = min(cf_times) if cf_times else 0
+    max_cf_time = max(cf_times) if cf_times else 0
+
     with open(output_dir / f"config_{suffix}", "w", encoding="utf-8") as f:
         f.write("=== CONFIGURATION ===\n\n")
         f.write(str(config) + "\n\n")
         f.write(str(explainer_profile))
+        f.write("\n\n=== TIMING INFORMATION ===\n\n")
+        f.write(f"Total CF generation time: {total_cf_time:.2f}s\n")
+        f.write(f"Average time per instance: {avg_cf_time:.2f}s\n")
+        f.write(f"Min time: {min_cf_time:.2f}s\n")
+        f.write(f"Max time: {max_cf_time:.2f}s\n")
+        f.write(f"Number of instances: {len(cf_times)}\n")
 
     # --- Save formatted recommendations ---
     rec_path = output_dir / f"recs_{suffix}"

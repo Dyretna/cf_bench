@@ -354,7 +354,7 @@ class RandomExplainerProfile(BaseExplainerProfile):
 class GeneticExplainerProfile(BaseExplainerProfile):
     posthoc_sparsity_param: float = 0.1
     posthoc_sparsity_algorithm: str = "linear"
-    maxiterations: int = 500
+    maxiterations: int = 1000
     verbose: bool = False
 
     @property
