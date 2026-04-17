@@ -1,4 +1,5 @@
 import datetime as dt
+import logging
 import warnings
 from pathlib import Path
 
@@ -7,7 +8,7 @@ import pandas as pd
 from sklearn.metrics import classification_report, roc_auc_score
 
 # local
-from .config import (  # GradientExplainerProfile, <-- not in use, no NN model
+from .config import (
     BaseExplainerProfile,
     GeneticExplainerProfile,
     GradientExplainerProfile,
@@ -18,8 +19,7 @@ from .dice_pipeline import DiceRecommender, build_explainer, build_risk_evaluato
 from .dice_pipeline.build_explainer import SanitizedModel
 from .utils import annotate_all, build_annotated_batch, format_all, recommend_all
 
-# --------------------------------------------------------------------------
-
+logger = logging.getLogger(__name__)
 
 # --------------------------------------------------------------------------
 # DiCE random explainer triggers Pandas FutureWarnings due to
@@ -41,6 +41,9 @@ PROFILE_MAP = {
 
 def run_pipeline(cfg):
     """Main runner: orchestrates data loading, CF generation, annotation and export."""
+
+    logger.info(f"Starting counterfactual pipeline for target: {cfg['target']}")
+    logger.info(f"Explainer profile: {cfg['explainer_profile']}")
 
     # --- Configuration and model ---
     config = SystemConfig(target=cfg["target"], backend=cfg["backend"])
@@ -99,20 +102,22 @@ def run_pipeline(cfg):
             if model_input_df[col].dtype == "object":
                 model_input_df[col] = pd.to_numeric(model_input_df[col])
 
-    print("\n==== DEBUG: model_input_df dtypes (for SanitizedModel) ====")
+    logger.debug("model_input_df dtypes (for SanitizedModel):")
     for col in config.feature_cols:
         if col in model_input_df.columns:
-            print(f"  {col}: {model_input_df[col].dtype}")
-    print("=" * 60)
+            logger.debug(f"  {col}: {model_input_df[col].dtype}")
 
-    print("==== DEBUG: DiCE dtype consistency check ====")
-    print(f"Training data dtype (etfruit): {df_traning_for_dice['etfruit'].dtype}")
-    print(f"Query data dtype (etfruit): {query_df['etfruit'].dtype}")
-    print(
+    logger.debug("DiCE dtype consistency check:")
+    logger.debug(
+        f"Training data dtype (etfruit): {df_traning_for_dice['etfruit'].dtype}"
+    )
+    logger.debug(f"Query data dtype (etfruit): {query_df['etfruit'].dtype}")
+    logger.debug(
         f"Training unique values (etfruit): {sorted(df_traning_for_dice['etfruit'].unique())}"
     )
-    print(f"Query unique values (etfruit): {sorted(query_df['etfruit'].unique())}")
-    print("=" * 60)
+    logger.debug(
+        f"Query unique values (etfruit): {sorted(query_df['etfruit'].unique())}"
+    )
 
     # --- Explainer profile selection ---
     profile_cls = PROFILE_MAP[cfg["explainer_profile"]]
@@ -143,22 +148,25 @@ def run_pipeline(cfg):
     # The explainer profile will also generate permitted_range with string
     # values for ordinals, ensuring consistency throughout the DiCE pipeline.
     # --------------------------------------------------------------------------
+    logger.info(f"Generating counterfactuals for {len(query_df)} instances...")
     cf_results = []
     for idx, row in query_df.iterrows():
         single_query = row.to_frame().T
 
         # Debug: show current query values and training data coverage
-        print(f"\n--- Query instance {idx} ---")
-        print("Query values:")
+        logger.debug(f"Query instance {idx}:")
+        logger.debug("Query values:")
         for feat in config.ordinal_features:
             if feat in row.index:
-                print(f"  {feat}: {row[feat]} (dtype: {type(row[feat]).__name__})")
+                logger.debug(
+                    f"  {feat}: {row[feat]} (dtype: {type(row[feat]).__name__})"
+                )
 
-        print("Training coverage:")
+        logger.debug("Training coverage:")
         for feat in config.ordinal_features:
             if feat in df_traning_for_dice.columns:
                 unique_vals = sorted(df_traning_for_dice[feat].unique())
-                print(f"  {feat}: {unique_vals}")
+                logger.debug(f"  {feat}: {unique_vals}")
 
         cf = explainer.generate_counterfactuals(
             query_instances=single_query,
@@ -215,7 +223,9 @@ def run_pipeline(cfg):
         )
 
     # Now we are in raw feature space for anything user-facing
-    all_formatted = format_all(recommender, all_recs, query_df)
+    all_formatted = format_all(
+        recommender, all_recs, query_df, model_input_df[config.target]
+    )
 
     # --- Predictions for performance export ---
     y_true, y_pred = _compute_predictions(config, model, model_input_df)
@@ -228,7 +238,9 @@ def run_pipeline(cfg):
     # --------------------------------------------------------------------------
     # Export results
     # --------------------------------------------------------------------------
+    logger.info("Exporting results...")
     output_dir = _prepare_output_dir(cfg, explainer_profile)
+    logger.info(f"Output directory: {output_dir}")
 
     # Save annotated batch
     annotated_batch.to_csv(

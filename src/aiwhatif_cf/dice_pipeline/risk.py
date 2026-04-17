@@ -50,7 +50,7 @@ class BaseRiskEvaluator(ABC):
         self.feature_cols = feature_cols
         self.target_factor = target_factor
 
-    def compute_original_risk(self, query_instance: pd.DataFrame) -> float:
+    def compute_risk_before(self, query_instance: pd.DataFrame) -> float:
         """Compute predicted risk for a single-row query instance."""
         return float(self._predict_proba(query_instance)[0])
 
@@ -65,10 +65,10 @@ class BaseRiskEvaluator(ABC):
     ) -> pd.DataFrame:
         """
         Annotate counterfactuals with:
-            - original_risk
+            - risk_before
             - target_risk
-            - predicted_risk
-            - meets_target_risk
+            - predicted_risk_after
+            - valid
         """
         counterfactuals = counterfactuals.copy()
 
@@ -78,7 +78,7 @@ class BaseRiskEvaluator(ABC):
         if "query_index" not in counterfactuals.columns:
             counterfactuals["query_index"] = int(query_instances.index[0])
 
-        original_prob: float = self.compute_original_risk(query_instances)
+        original_prob: float = self.compute_risk_before(query_instances)
         target_risk: float = original_prob * self.target_factor
 
         counterfactuals["risk_before"] = original_prob

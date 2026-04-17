@@ -69,18 +69,22 @@ def recommend_all(
     return all_recs
 
 
-def format_all(recommender: "DiceRecommender", recs_list, query_df) -> list[str]:
+def format_all(
+    recommender: "DiceRecommender", recs_list, query_df, target_values
+) -> list[str]:
     """
     Format recommendation outputs for all query instances.
 
     Parameters
     ----------
     recommender : DiceRecommender
-        Recommender providing formatting utilities.
-    recs_list : list
-        Raw recommendations.
-    query_df : pandas.DataFrame
-        Original query instances.
+        Recommender instance.
+    recs_list : list[list[dict]]
+        Recommendations per query instance.
+    query_df : pd.DataFrame
+        Query instances (without target column).
+    target_values : pd.Series
+        True target values for each query instance.
 
     Returns
     -------
@@ -91,8 +95,10 @@ def format_all(recommender: "DiceRecommender", recs_list, query_df) -> list[str]
 
     for i, recs in enumerate(recs_list):
         qi = query_df.iloc[[i]]
+        # Get true outcome from target_values Series using the same index
+        true_outcome = int(target_values.iloc[i])
         all_formatted.append(
-            recommender.format_recommendations(qi, recs, true_outcome=1)
+            recommender.format_recommendations(qi, recs, true_outcome=true_outcome)
         )
 
     return all_formatted
@@ -117,7 +123,7 @@ def build_annotated_batch(query_instances, all_annotated, target):
         cf_risk = all_annotated[i]
 
         # Risk values (same for all CFs)
-        original_risk = cf_risk["original_risk"].iloc[0]
+        risk_before = cf_risk["risk_before"].iloc[0]
         target_risk = cf_risk["target_risk"].iloc[0]
 
         # Outcome value
@@ -131,7 +137,7 @@ def build_annotated_batch(query_instances, all_annotated, target):
 
         orig_row["query_index"] = idx
         orig_row["cf_id"] = "original"
-        orig_row["original_risk"] = original_risk
+        orig_row["risk_before"] = risk_before
         orig_row["target_risk"] = target_risk
         orig_row[target] = outcome_value
 

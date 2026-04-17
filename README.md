@@ -27,3 +27,40 @@ provide the most accurate and meaningful predictions across lifestyle factors?
 - **Approach:** Model-agnostic counterfactual generation
 
 ---
+
+## Usage
+
+### Running the Pipeline
+
+Basic usage:
+```bash
+python -m aiwhatif_cf.cli --config configs/rf_hltprhc_cfcheck.yaml
+```
+
+With debug output (shows detailed dtype info, query details, etc.):
+```bash
+python -m aiwhatif_cf.cli --config configs/xgboost_hltprhc_cfcheck.yaml --debug
+```
+
+### Logging Levels
+
+- **Normal mode** (default): Shows INFO level messages - pipeline progress, major steps
+- **Debug mode** (`--debug` flag): Shows DEBUG level messages - detailed dtype conversions, query instance details, SanitizedModel operations
+
+Examples of output:
+```
+# Normal mode
+INFO: Starting counterfactual pipeline for target: hltprhc
+INFO: Explainer profile: genetic
+INFO: Generating counterfactuals for 50 instances...
+INFO: Exporting results...
+INFO: Output directory: cf_outputs/genetic_hltprhc_2026-04-17
+
+# Debug mode
+2026-04-17 14:23:45 - aiwhatif_cf.dice_batch_runner - DEBUG - model_input_df dtypes (for SanitizedModel):
+2026-04-17 14:23:45 - aiwhatif_cf.dice_batch_runner - DEBUG -   bmi: float64
+2026-04-17 14:23:45 - aiwhatif_cf.dice_batch_runner - DEBUG -   etfruit: object
+...
+```
+
+---

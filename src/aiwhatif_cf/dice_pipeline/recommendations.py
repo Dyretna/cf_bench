@@ -39,16 +39,16 @@ class DiceRecommender:
             A list where each element corresponds to one counterfactual and
             contains:
                 - "cf_id": Optional identifier for the counterfactual (if present)
-                - "predicted_risk": The predicted risk for the CF (if present)
-                - "meets_target_risk": Whether the CF meets the risk target (if present)
+                - "predicted_risk_after": The predicted risk for the CF (if present)
+                - "valid": Whether the CF meets the risk target (if present)
                 - "changes": A list of (feature, original_value, cf_value) tuples
                 describing all feature-level modifications.
 
             Example element:
             {
                 "cf_id": "CF3",
-                "predicted_risk": 0.12,
-                "meets_target_risk": True,
+                "predicted_risk_after": 0.12,
+                "valid": True,
                 "changes": [
                     ("bmi", 31.4, 27.8),
                     ("smoking", 1, 0),
@@ -71,10 +71,10 @@ class DiceRecommender:
                 {
                     "query_index": row.get("query_index"),
                     "cf_id": row.get("cf_id"),
-                    "original_risk": row.get("original_risk"),
+                    "risk_before": row.get("risk_before"),
                     "target_risk": row.get("target_risk"),
-                    "predicted_risk": row.get("predicted_risk"),
-                    "meets_target_risk": row.get("meets_target_risk"),
+                    "predicted_risk_after": row.get("predicted_risk_after"),
+                    "valid": row.get("valid"),
                     "changes": changes,
                 }
             )
@@ -97,10 +97,10 @@ class DiceRecommender:
             contain:
                 - "query_index": int
                 - "cf_id": str
-                - "predicted_risk": float or None
-                - "meets_target_risk": bool or None
+                - "predicted_risk_after": float or None
+                - "valid": bool or None
                 - "changes": list of (feature, old_value, new_value)
-                - "original_risk": float (only present on the first element)
+                - "risk_before": float (only present on the first element)
                 - "target_risk": float (only present on the first element)
         true_outcome : int or str
             The true label of the original instance (e.g., 0 or 1).
@@ -134,8 +134,16 @@ class DiceRecommender:
         lines.append("")
 
         # Original + target risk
-        orig_risk = recs[0].get("original_risk")
+        orig_risk = recs[0].get("risk_before")
         target_risk = recs[0].get("target_risk")
+
+        # Convert to scalars if needed (defensive)
+        if hasattr(orig_risk, "iloc"):
+            orig_risk = float(orig_risk.iloc[0])
+        if hasattr(target_risk, "iloc"):
+            target_risk = float(target_risk.iloc[0])
+        if hasattr(true_outcome, "iloc"):
+            true_outcome = int(true_outcome.iloc[0])
 
         lines.append(
             f"Original predicted risk (P({self.target}={true_outcome})): "
@@ -149,9 +157,13 @@ class DiceRecommender:
         # --- Counterfactuals ---
         for r in recs:
             cf_id = r.get("cf_id")
-            risk = r.get("predicted_risk")
-            meets = r.get("meets_target_risk")
+            risk = r.get("predicted_risk_after")
+            meets = r.get("valid")
             changes = r.get("changes", [])
+
+            # Convert risk to scalar if needed
+            if hasattr(risk, "iloc"):
+                risk = float(risk.iloc[0]) if len(risk) > 0 else None
 
             lines.append(f"--- {cf_id} ---")
 

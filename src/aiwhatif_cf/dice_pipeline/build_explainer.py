@@ -1,8 +1,12 @@
+import logging
+
 import dice_ml
 import pandas as pd
 from dice_ml.explainer_interfaces.dice_tensorflow2 import DiceTensorFlow2
 
 from ..config import SystemConfig
+
+logger = logging.getLogger(__name__)
 
 
 class SanitizedModel:
@@ -47,36 +51,34 @@ class SanitizedModel:
         """Convert DiCE output (strings for ordinals) to numeric dtypes."""
         df = df.copy()
 
-        # DEBUG: Show what we're working with
-        # print(f"\n=== DEBUG _sanitize() ===")
-        # print(f"Input dtypes: {df.dtypes.to_dict()}")
-        # print(f"Target dtypes: {self.train_dtypes}")
-        # print(f"Input shape: {df.shape}")
+        logger.debug("SanitizedModel._sanitize() called")
+        logger.debug(f"Input dtypes: {df.dtypes.to_dict()}")
+        logger.debug(f"Target dtypes: {self.train_dtypes}")
+        logger.debug(f"Input shape: {df.shape}")
 
         for col, target_dtype in self.train_dtypes.items():
             if col not in df.columns:
-                # print(f"  SKIP {col}: not in df.columns")
+                logger.debug(f"  SKIP {col}: not in df.columns")
                 continue
 
             current_dtype = df[col].dtype
-            # print(f"  {col}: {current_dtype} -> {target_dtype}")
+            logger.debug(f"  {col}: {current_dtype} -> {target_dtype}")
 
             # Convert string/object to numeric ALWAYS (don't skip)
             if current_dtype == "object" or pd.api.types.is_string_dtype(current_dtype):
-                # print(f"    Converting {col} from object/string to numeric")
+                logger.debug(f"    Converting {col} from object/string to numeric")
                 df[col] = pd.to_numeric(df[col], errors="coerce")
-                # print(f"    After pd.to_numeric: {df[col].dtype}")
+                logger.debug(f"    After pd.to_numeric: {df[col].dtype}")
 
             # Cast to target dtype
             try:
                 df[col] = df[col].astype(target_dtype)
-                # print(f"    After astype: {df[col].dtype}")
-            except Exception:
-                # print(f"    ERROR casting {col}: {e}")
+                logger.debug(f"    After astype: {df[col].dtype}")
+            except Exception as e:
+                logger.warning(f"    Error casting {col}: {e}, using coerce fallback")
                 df[col] = pd.to_numeric(df[col], errors="coerce").astype(target_dtype)
 
-        # print(f"Output dtypes: {df.dtypes.to_dict()}")
-        # print(f"=== END _sanitize() ===\n")
+        logger.debug(f"Output dtypes: {df.dtypes.to_dict()}")
         return df
 
     def predict_proba(self, df):
