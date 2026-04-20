@@ -16,13 +16,13 @@ from .config import (
 from .data.loaders import load_dice_compatible_data
 from .data.transformers import FeatureScaler, QueryInstancePreparer
 from .dice_adapters import SanitizedModel, build_explainer, build_risk_evaluator
-from .model_info_extractors import extract_model_info
 from .results.exporters import (
     ConfigExporter,
     ModelInfoExporter,
     create_output_directory,
 )
 from .results.metrics import PerformanceMetrics
+from .results.model_info_extractors import extract_model_info
 from .results.predictions import ModelPredictor
 from .utils import annotate_all, build_annotated_batch
 
@@ -239,10 +239,15 @@ def run_pipeline(cfg):
     # Export
     # -------------------------------------------------------------------------
     logger.info("Exporting results...")
+
+    # Extract and model info
+    model_info = extract_model_info(model, config)
+
     output_dir = create_output_directory(
-        cfg["output_dir"],
-        explainer_profile.method,
-        cfg["target"],
+        output_base=cfg["output_dir"],
+        model_type=model_info["model_type"],
+        explainer_method=explainer_profile.method,
+        target=cfg["target"],
     )
     logger.info(f"Output directory: {output_dir}")
 
@@ -261,9 +266,7 @@ def run_pipeline(cfg):
         timing_metrics=timing_metrics,
     )
 
-    # Extract and export model info
-    model_info = extract_model_info(model, config)
-
+    # export modell info
     ModelInfoExporter.export_json(
         output_dir / f"model_{config.target}_info.json",
         model_info,

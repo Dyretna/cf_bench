@@ -10,11 +10,11 @@ if TYPE_CHECKING:
 
 
 def create_output_directory(
-    output_base: str, explainer_method: str, target: str
+    output_base: str, model_type: str, explainer_method: str, target: str
 ) -> Path:
     """Create a timestamped output directory for pipeline results."""
     today = dt.datetime.today().strftime("%Y-%m-%d")
-    run_name = f"{explainer_method}_{target}_{today}"
+    run_name = f"{model_type}_{explainer_method}_{target}_{today}"
     output_dir = Path(output_base) / run_name
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir

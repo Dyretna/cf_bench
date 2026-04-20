@@ -1,34 +1,80 @@
 # Counterfactual Transitions in Cardiovascular Disease (CVD) Predictions
 
 ## Project Overview
-With the rapid growth of machine learning and explainable artificial intelligence (XAI) in healthcare, **counterfactual explanations** have emerged as a powerful tool for making predictive models actionable at the individual level.
+With the rapid growth of machine learning and explainable AI (XAI) in healthcare, **counterfactual explanations** have become a powerful tool for making predictive models actionable at the individual level.
 
-This project investigates **counterfactual transitions in cardiovascular disease (CVD) risk predictions**, focusing on how small, feasible changes in modifiable risk factors can lead to safer prediction outcomes. Rather than population-level recommendations, this work supports **personalized prevention**, empowering clinicians, policymakers, and individuals to understand which specific interventions are most impactful for reducing cardiovascular risk.
+This project evaluates counterfactual explanation methods for heart‑disease prediction models. As part of Nightingale’s *ai‑whatif* initiative, the Python framework `DiCE` is tested across multiple predictor models.
+Related repositories explore the R‑based framework `dandl`, allowing for cross‑framework comparisons.
 
-Counterfactual explanations identify the *minimal feasible modification* required in a patient’s risk profile to change a predicted outcome (e.g., from high risk to low risk). By linking modifiable features—such as smoking behavior, BMI, blood pressure, education, or income proxies—to changes in predicted CVD risk, this project bridges the gap between statistical prediction and actionable public health or clinical decision-making.
+The overall aim is to understand how different counterfactual algorithms perform in terms of **validity**, **plausibility**, and **computational speed**.
 
+## Project Goals — Experimental Focus
+To investigate which combinations of:
 
-## Project Goals - Experimentations for testing
-Which combinations of:
-- machine learning models and
-- counterfactual algorithms
+- machine‑learning predictor models, and
+- counterfactual‑generation algorithms
 
-provide the most accurate and meaningful predictions across lifestyle factors?
-
+produce the most accurate, realistic, and meaningful counterfactual transitions across lifestyle‑related health factors.
 
 ## Methods and Tools
 - **Data source:** European Social Survey (ESS) derived dataset (cleaned and feature-engineered)
+- **Counterfactual framework:** DiCE (Diverse Counterfactual Explanations)
 - **Predictive models - for CVD risk prediction:**
       - Random Forest classifier
       - XGboost
       - tensorflow nn-models
 
-- **Counterfactual framework:** DiCE (Diverse Counterfactual Explanations)
 - **Approach:** Model-agnostic counterfactual generation
 
 ---
 
+## Repository Structure
+```
+.
+├── cf_outputs/         # Generated counterfactuals
+├── configs/            # YAML configuration files for pipeline runs
+├── data/               # dataset directory
+├── notebooks/          # Jupyter notebooks for experiments and analysis
+├── src/                # Python package source code
+│   └── cf_bench/
+├── models/             # Saved predictor models
+├── pyproject.toml      # Package definition
+└── README.md
+```
+
+---
+
+
+## Installation
+Install the project as a local package:
+
+```bash
+pip install -e .
+```
+
+after installation, modules can be imported directly
+
+## Configuration (YAML)
+The pipeline is configured using YAML files stored in the configs/ directory.
+These files define paths, some of the settings and parameters.
+
+
+## Environment Variables (`.env`)
+This repository uses a `.env` file to store local paths dynamically.
+This makes it easier to import directories consistently in notebooks.
+
+Create a `.env` file in the project root and define any paths you need, for example:
+```
+DATA_DIR=/path/to/data
+MODELS_DIR=/path/to/models
+CF_OUTPUTS=/path/to/counterfactuals
+```
+
 ## Usage
+1. Create a .env file with your local paths
+2. Select or edit a YAML config in configs/
+3. Generated counterfactuals (CSV files, metrics, metadata) will be saved in the directory specified in the config.
+
 
 ### Running the Pipeline
 

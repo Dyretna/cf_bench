@@ -12,5 +12,5 @@ backend: "TF2"
 # profile, eg. DiCE model
 explainer_profile: "gradient"
 total_cfs: 20
-stopping_threshold: None
+stopping_threshold: None   # does not use
 use_permitted_range: true  # Neural network with gradient descent handles permitted range well

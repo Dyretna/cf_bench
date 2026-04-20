@@ -1,4 +1,9 @@
-"""Data loading strategies for DiCE and model compatibility."""
+"""
+Data loading strategies for DiCE and model compatibility.
+
+We are using an anbstract baseclass, to give the possibiblity
+extending with loaders from other CF-packages.
+"""
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
@@ -13,23 +18,7 @@ class DataLoader(ABC):
     """Base class for data loading strategies."""
 
     @abstractmethod
-    def load(self, path: str, config: "SystemConfig") -> pd.DataFrame:
-        """
-        Load data from file with appropriate dtype handling.
-
-        Parameters
-        ----------
-        path : str
-            Path to CSV file
-        config : SystemConfig
-            Configuration object containing feature metadata
-
-        Returns
-        -------
-        pd.DataFrame
-            Loaded DataFrame with correct dtypes
-        """
-        pass
+    def load(self, path: str, config: "SystemConfig") -> pd.DataFrame: ...
 
 
 class DiCECompatibleLoader(DataLoader):

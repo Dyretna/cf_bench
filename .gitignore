@@ -229,5 +229,3 @@ TODO.md
 # models (too big)
 *.pkl
 *.keras
-
-/cf_outputs

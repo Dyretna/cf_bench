@@ -26,7 +26,7 @@ class SanitizedModel:
 
     The conversion strategy:
     1. Store the numeric dtypes from model_input_df (XGBoost's expected input)
-    2. When DiCE calls predict, convert string ordinals → numeric
+    2. When DiCE calls predict, convert string ordinals -> numeric
     3. Cast all features to match the stored dtypes
     4. Forward to the actual model
     """
@@ -85,7 +85,7 @@ class SanitizedModel:
         """
         Sanitize input and forward to model.predict_proba.
 
-        _sanitize() handles all dtype conversions (strings → numeric).
+        _sanitize() handles all dtype conversions (strings -> numeric).
         """
         df_sanitized = self._sanitize(df)
         return self.model.predict_proba(df_sanitized)
@@ -94,7 +94,7 @@ class SanitizedModel:
         """
         Sanitize input and forward to model.predict.
 
-        _sanitize() handles all dtype conversions (strings → numeric).
+        _sanitize() handles all dtype conversions (strings -> numeric).
         """
         df_sanitized = self._sanitize(df)
         return self.model.predict(df_sanitized)

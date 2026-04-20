@@ -141,37 +141,14 @@ class QueryInstancePreparer:
     """
 
     def __init__(self, config: "SystemConfig"):
-        """
-        Initialize query instance preparer.
-
-        Parameters
-        ----------
-        config : SystemConfig
-            Configuration containing feature metadata
-        """
         self.config = config
         self.dtype_converter = DtypeConverter(config)
 
     def prepare(
         self, model_input_df: pd.DataFrame, training_df: pd.DataFrame
     ) -> pd.DataFrame:
-        """
-        Prepare query instances for DiCE from model input data.
+        """Prepare query instances for DiCE from model input data."""
 
-        Converts numeric ordinals to strings to match training data dtypes.
-
-        Parameters
-        ----------
-        model_input_df : pd.DataFrame
-            Model input data with numeric dtypes
-        training_df : pd.DataFrame
-            Training data used by DiCE (with string ordinals)
-
-        Returns
-        -------
-        pd.DataFrame
-            Query instances with DiCE-compatible dtypes
-        """
         # Drop target column to get query instances
         query_df = model_input_df.drop(columns=[self.config.target])
 
@@ -196,23 +173,8 @@ def scale_data_if_keras(
     Note: Scaling is applied to the numeric representation of features.
     For ordinal features loaded as strings, we first convert to numeric,
     scale, then can convert back to strings for DiCE compatibility if needed.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input DataFrame
-    config : SystemConfig
-        Configuration containing feature metadata
-    scaler_path : str
-        Path to saved scaler object
-    is_keras : bool
-        Whether the model is a Keras model
-
-    Returns
-    -------
-    tuple
-        (scaled_df, scaler) if is_keras=True, else (df, None)
     """
+
     if not is_keras:
         return df, None
 
