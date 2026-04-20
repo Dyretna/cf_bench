@@ -80,12 +80,12 @@ CF_OUTPUTS=/path/to/counterfactuals
 
 Basic usage:
 ```bash
-python -m aiwhatif_cf.cli --config configs/rf_hltprhc_cfcheck.yaml
+python -m cf_bench.cli --config configs/rf_hltprhc_cfcheck.yaml
 ```
 
 With debug output (shows detailed dtype info, query details, etc.):
 ```bash
-python -m aiwhatif_cf.cli --config configs/xgboost_hltprhc_cfcheck.yaml --debug
+python -m cf_bench.cli --config configs/xgboost_hltprhc_cfcheck.yaml --debug
 ```
 
 ### Logging Levels
@@ -103,9 +103,9 @@ INFO: Exporting results...
 INFO: Output directory: cf_outputs/genetic_hltprhc_2026-04-17
 
 # Debug mode
-2026-04-17 14:23:45 - aiwhatif_cf.dice_batch_runner - DEBUG - model_input_df dtypes (for SanitizedModel):
-2026-04-17 14:23:45 - aiwhatif_cf.dice_batch_runner - DEBUG -   bmi: float64
-2026-04-17 14:23:45 - aiwhatif_cf.dice_batch_runner - DEBUG -   etfruit: object
+2026-04-17 14:23:45 - cf_bench.dice_batch_runner - DEBUG - model_input_df dtypes (for SanitizedModel):
+2026-04-17 14:23:45 - cf_bench.dice_batch_runner - DEBUG -   bmi: float64
+2026-04-17 14:23:45 - cf_bench.dice_batch_runner - DEBUG -   etfruit: object
 ...
 ```
 
