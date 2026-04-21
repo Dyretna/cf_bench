@@ -10,6 +10,6 @@ backend: "sklearn"
 
 # profile, eg. DiCE model
 explainer_profile: "genetic"   # "random" or "genetic"
-total_CFs: 10
-stopping_threshold: 0.9
-use_permitted_range: false  # Random Forest works better without permitted range constraints
+total_CFs: 20
+stopping_threshold: 0.1
+use_permitted_range: true  # Random Forest works better without permitted range constraints
