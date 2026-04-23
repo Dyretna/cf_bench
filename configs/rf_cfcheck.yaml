@@ -1,15 +1,14 @@
 # paths
 train_path: "data/full.csv"
 test_path: "data/cfcheck.csv"
-model_path: "models/xgboost_hltprhc.pkl"
+model_path: "models/rf_hltprhc.pkl"
 output_dir: "cf_outputs"
 
 # system config
-target: "hltprhc"
 backend: "sklearn"
 
 # profile, eg. DiCE model
 explainer_profile: "genetic"   # "random" or "genetic"
 total_CFs: 20
 stopping_threshold: 0.1
-use_permitted_range: true  # XGBoost with genetic algorithm handles permitted range well
+use_permitted_range: true  # use with genetic

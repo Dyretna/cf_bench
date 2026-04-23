@@ -10,11 +10,30 @@ if TYPE_CHECKING:
 
 
 def create_output_directory(
-    output_base: str, model_type: str, explainer_method: str, target: str
+    output_base: str,
+    model_type: str,
+    explainer_method: str,
+    use_permitted_range: bool,
+    threshold: float,
 ) -> Path:
     """Create a timestamped output directory for pipeline results."""
+
+    if use_permitted_range:
+        prange = "prange"
+    else:
+        prange = ""
+
+    if 0 < threshold <= 0.3:
+        thres = "low"
+    elif 0.4 <= threshold <= 0.6:
+        thres = "mid"
+    elif 0.7 < threshold < 1:
+        thres = "high"
+    else:
+        thres = "unknown"
+
     today = dt.datetime.today().strftime("%Y-%m-%d")
-    run_name = f"{model_type}_{explainer_method}_{target}_{today}"
+    run_name = f"{model_type}_{explainer_method}_{prange}_{thres}thres_{today}"
     output_dir = Path(output_base) / run_name
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir

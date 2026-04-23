@@ -50,11 +50,11 @@ PROFILE_MAP = {
 def run_pipeline(cfg):
     """Main runner: orchestrates data loading, CF generation, annotation and export."""
 
-    logger.info(f"Starting counterfactual pipeline for target: {cfg['target']}")
+    logger.info("Starting counterfactual pipeline")
     logger.info(f"Explainer profile: {cfg['explainer_profile']}")
 
     # --- Configuration and model ---
-    config = SystemConfig(target=cfg["target"], backend=cfg["backend"])
+    config = SystemConfig(backend=cfg["backend"])
 
     if config.backend == "TF2":
         import tensorflow as tf
@@ -168,7 +168,7 @@ def run_pipeline(cfg):
     annotated_batch = build_annotated_batch(
         query_instances=query_df,
         all_annotated=all_annotated,
-        target=cfg["target"],
+        target=config.target,
     )
 
     # Add CF generation time per instance to annotated batch
@@ -182,7 +182,7 @@ def run_pipeline(cfg):
         axis=1,
     )
 
-    # Inverse scale if needed
+    # Inverse scale if needed (if TF2 backend)
     if scaler is not None:
         feature_scaler = FeatureScaler(scaler, config)
         annotated_batch = feature_scaler.inverse_transform(
@@ -217,18 +217,16 @@ def run_pipeline(cfg):
         output_base=cfg["output_dir"],
         model_type=model_info["model_type"],
         explainer_method=explainer_profile.method,
-        target=cfg["target"],
+        threshold=explainer_profile.stopping_threshold,
+        use_permitted_range=cfg["use_permitted_range"],
     )
     logger.info(f"Output directory: {output_dir}")
 
     # Save annotated batch CSV
-    annotated_batch.to_csv(
-        output_dir / f"{explainer_profile.method}_annotated_{cfg['target']}.csv",
-        index=False,
-    )
+    annotated_batch.to_csv(output_dir / "annotated.csv", index=False)
 
     # Export configuration with timing
-    suffix = f"{explainer_profile.method}_{config.target}.txt"
+    suffix = f"{model_info['model_type']}_{explainer_profile.method}.txt"
     ConfigExporter.export(
         output_path=output_dir / f"config_{suffix}",
         system_config=config,
@@ -238,12 +236,12 @@ def run_pipeline(cfg):
 
     # export modell info
     ModelInfoExporter.export_json(
-        output_dir / f"model_{config.target}_info.json",
+        output_dir / "model_info.json",
         model_info,
     )
 
     ModelInfoExporter.export(
-        output_dir / f"model_{config.target}_info.txt",
+        output_dir / "model_info.txt",
         model_info,
         performance_metrics,
     )
