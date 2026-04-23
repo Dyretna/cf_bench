@@ -142,6 +142,8 @@ class BatchRunner:
             start_time = time.perf_counter()
             cf = explainer.generate_counterfactuals(
                 query_instances=single_query,
+                # purpose is to set direction and constraints
+                # in permitted_range for each query(row)
                 **self.explainer_profile.to_cf_params_for_row(row),
             )
             end_time = time.perf_counter()
