@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict
 
+from .metrics import PerformanceMetrics
+
 if TYPE_CHECKING:
     from ..config import BaseExplainerProfile, SystemConfig
 
@@ -49,8 +51,6 @@ class ConfigExporter:
         explainer_profile: "BaseExplainerProfile",
         timing_metrics: Dict[str, float],
     ) -> None:
-        from .metrics import PerformanceMetrics
-
         with open(output_path, "w", encoding="utf-8") as f:
             f.write("=== CONFIGURATION ===\n\n")
             f.write(str(system_config) + "\n\n")
