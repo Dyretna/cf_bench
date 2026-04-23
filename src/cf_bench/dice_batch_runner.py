@@ -23,7 +23,7 @@ from .results.exporters import (
 )
 from .results.metrics import PerformanceMetrics
 from .results.model_info_extractors import extract_model_info
-from .results.predictions import ModelPredictor
+from .results.predictions import predict_model
 from .utils import build_annotated_batch
 
 logger = logging.getLogger(__name__)
@@ -206,8 +206,8 @@ class BatchRunner:
         # -------------------------------------------------------------------------
         # Prediction and metrics
         # -------------------------------------------------------------------------
-        predictor = ModelPredictor(backend=config.backend)
-        y_true, y_pred = predictor.predict(
+        y_true, y_pred = predict_model(
+            backend=config.backend,
             model=self.model,
             df=model_input_df_numeric,
             feature_cols=config.feature_cols,
