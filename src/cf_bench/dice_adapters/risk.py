@@ -97,6 +97,37 @@ class BaseRiskEvaluator(ABC):
         ]
         return counterfactuals[first_cols + other_cols + risk_cols]
 
+    def annotate_all(
+        self,
+        cf_results: list,
+        query_df: pd.DataFrame,
+    ) -> list[pd.DataFrame]:
+        """
+        Annotate all counterfactual batches.
+
+        Parameters
+        ----------
+        cf_results : list[dice_ml.CounterfactualExamples]
+            List of counterfactual generation outputs (one per query instance).
+        query_df : pandas.DataFrame
+            Original query instances.
+
+        Returns
+        -------
+        list[pandas.DataFrame]
+            Annotated counterfactuals per query instance.
+        """
+        annotated_batches = []
+
+        # Iterate over the list of CounterfactualExplanations objects
+        for i, cf in enumerate(cf_results):
+            qi = query_df.iloc[[i]]
+            # Access cf_examples_list[0] since we generate one query at a time
+            cf_df = cf.cf_examples_list[0].final_cfs_df
+            annotated_batches.append(self.annotate(qi, cf_df))
+
+        return annotated_batches
+
     @abstractmethod
     def _predict_proba(self, X: pd.DataFrame) -> np.ndarray:
         """Return a 1D array of predicted probabilities."""

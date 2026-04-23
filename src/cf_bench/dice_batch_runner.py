@@ -24,7 +24,7 @@ from .results.exporters import (
 from .results.metrics import PerformanceMetrics
 from .results.model_info_extractors import extract_model_info
 from .results.predictions import ModelPredictor
-from .utils import annotate_all, build_annotated_batch
+from .utils import build_annotated_batch
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +170,7 @@ class BatchRunner:
             target_factor=config.target_factor,
         )
 
-        all_annotated = annotate_all(risk_evaluator, cf_results, query_df)
+        all_annotated = risk_evaluator.annotate_all(cf_results, query_df)
 
         # ----------------------------------------------------------------------
         # Build annotated batch for export/inspection
