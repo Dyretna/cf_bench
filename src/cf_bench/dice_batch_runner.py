@@ -7,6 +7,7 @@ import pandas as pd
 
 # Local imports
 from .config import (
+    BaseExplainerProfile,
     GeneticExplainerProfile,
     GradientExplainerProfile,
     RandomExplainerProfile,
@@ -41,10 +42,6 @@ PROFILE_MAP = {
     "gradient": GradientExplainerProfile,
 }
 
-# --------------------------------------------------------------------------
-# Run the batch pipeline
-# --------------------------------------------------------------------------
-
 
 class BatchRunner:
     """Orchestrates counterfactual generation pipeline."""
@@ -69,8 +66,9 @@ class BatchRunner:
         self.model, self.is_keras, self.scaler = self._load_model()
 
         # Create explainer profile
+        # (Dice Search Algorithm: "random" | "genetic" | "gradient", + params)
         profile_cls = PROFILE_MAP[self.explainer_profile_name]
-        self.explainer_profile = profile_cls(
+        self.explainer_profile: BaseExplainerProfile = profile_cls(
             features_to_vary=self.config.features_to_vary,
             ordinal_allowed_values=self.config.ordinal_allowed_values,
             total_CFs=self.total_CFs,
@@ -87,8 +85,6 @@ class BatchRunner:
         logger.info(f"stopping threshold: {self.stopping_threshold}")
 
         config = self.config
-        model = self.model
-        scaler = self.scaler
 
         # --- Data loading ---
         df_traning_for_dice = load_dice_compatible_data(self.train_path, config)
@@ -96,7 +92,7 @@ class BatchRunner:
 
         # --- Optional scaling (for Keras models) ---
         if self.is_keras:
-            feature_scaler = FeatureScaler(scaler, config)
+            feature_scaler = FeatureScaler(self.scaler, config)
             model_input_df = feature_scaler.transform(df_raw, convert_ordinals=True)
         else:
             model_input_df = df_raw
@@ -122,7 +118,7 @@ class BatchRunner:
         # --------------------------------------------------------------------------
         explainer = build_explainer(
             config=config,
-            predictor_model=model,
+            predictor_model=self.model,
             model_input_df=model_input_df_numeric,  # Use numeric version for dtype reference
             training_df=df_traning_for_dice,
             explainer_method=self.explainer_profile.method,
@@ -161,9 +157,9 @@ class BatchRunner:
         # Wrap model with SanitizedModel for sklearn backend
         # to handle string -> numeric conversion
         if self.backend == "sklearn":
-            model_for_risk = SanitizedModel(model, model_input_df_numeric)
+            model_for_risk = SanitizedModel(self.model, model_input_df_numeric)
         else:
-            model_for_risk = model
+            model_for_risk = self.model
 
         risk_evaluator = build_risk_evaluator(
             backend=self.backend,
@@ -198,8 +194,8 @@ class BatchRunner:
         )
 
         # Inverse scale if needed (if TF2 backend)
-        if scaler is not None:
-            feature_scaler = FeatureScaler(scaler, config)
+        if self.scaler is not None:
+            feature_scaler = FeatureScaler(self.scaler, config)
             annotated_batch = feature_scaler.inverse_transform(
                 annotated_batch,
                 feature_cols=config.feature_cols,
@@ -210,7 +206,7 @@ class BatchRunner:
         # -------------------------------------------------------------------------
         predictor = ModelPredictor(backend=config.backend)
         y_true, y_pred = predictor.predict(
-            model=model,
+            model=self.model,
             df=model_input_df_numeric,
             feature_cols=config.feature_cols,
             target_col=config.target,
@@ -226,7 +222,7 @@ class BatchRunner:
         logger.info("Exporting results...")
 
         # Extract and model info
-        model_info = extract_model_info(model, config)
+        model_info = extract_model_info(self.model, config)
 
         output_dir = create_output_directory(
             output_base=self.output_dir,
@@ -318,9 +314,9 @@ class BatchRunner:
                 logger.debug(f"  {feat}: {unique_vals}")
 
 
-# -----------------------------------------------------------------------------
-# Convenience function for backward compatibility
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+# Run the batch pipeline
+# --------------------------------------------------------------------------
 
 
 def run_pipeline(cfg):
