@@ -62,7 +62,7 @@ class BatchRunner:
         # System config
         self.config = SystemConfig(backend=self.backend)
 
-        # Load model and scaler once
+        # Load model and scaler
         self.model, self.is_keras, self.scaler = self._load_model()
 
         # Create explainer profile

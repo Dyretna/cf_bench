@@ -1,0 +1,38 @@
+{
+  "model_type": "RandomForest",
+  "model_class": "RandomForestClassifier",
+  "model_module": "sklearn.ensemble._forest",
+  "n_estimators": 300,
+  "max_depth": null,
+  "params": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "class_weight": null,
+    "criterion": "gini",
+    "max_depth": null,
+    "max_features": "sqrt",
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 300,
+    "n_jobs": null,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "feature_importances": {
+    "etfruit": 0.10038042990201629,
+    "eatveg": 0.08787931045144184,
+    "cgtsmok": 0.06353193538299809,
+    "alcfreq": 0.08901314621725157,
+    "slprl": 0.04969735780083307,
+    "paccnois": 0.012287321269099455,
+    "bmi": 0.5098860714672876,
+    "dosprt": 0.08732442750907209
+  }
+}
