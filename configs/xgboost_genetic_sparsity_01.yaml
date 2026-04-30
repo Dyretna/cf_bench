@@ -1,0 +1,18 @@
+# paths
+train_path: "data/full.csv"
+test_path: "data/cfcheck.csv"
+model_path: "models/xgboost_HL.pkl"
+output_dir: "cf_outputs/sparsity_tests"
+
+# system config
+target: "hltprhc"
+backend: "sklearn"
+
+# DiCE profile
+explainer_profile: "genetic"
+total_CFs: 20
+stopping_threshold: 0.1
+use_permitted_range: true
+
+posthoc_sparsity_param: 0.1
+run_id: "sp0.1"

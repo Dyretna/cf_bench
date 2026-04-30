@@ -1,0 +1,25 @@
+# Experiment: lock BMI and smoking
+# DiCE cannot suggest weight loss or smoking changes.
+# Use case: person with medical condition preventing weight change, and a non-quitter.
+# What lifestyle changes (sport, diet, sleep, alcohol) would still reduce risk?
+
+# paths
+train_path: "data/full.csv"
+test_path: "data/cfcheck.csv"
+model_path: "models/xgboost_HL.pkl"
+output_dir: "cf_outputs/feature_locking_tests"
+
+# system config
+target: "hltprhc"
+backend: "sklearn"
+
+# DiCE profile
+explainer_profile: "genetic"
+total_CFs: 20
+stopping_threshold: 0.1
+use_permitted_range: true
+
+posthoc_sparsity_param: 0.1
+
+features_to_lock: ["cgtsmok", "bmi"]
+run_id: "lock_bmi_smoking"

@@ -1,0 +1,22 @@
+# Experiment: sparsity_param = 0.5 (moderate post-processing)
+# DiCE will try harder to zero out medium-sized feature changes.
+# Compare with sparsity_01 — expect fewer features changed per CF.
+
+# paths
+train_path: "data/full.csv"
+test_path: "data/cfcheck.csv"
+model_path: "models/xgboost_HL.pkl"
+output_dir: "cf_outputs/sparsity_tests"
+
+# system config
+target: "hltprhc"
+backend: "sklearn"
+
+# DiCE profile
+explainer_profile: "genetic"
+total_CFs: 20
+stopping_threshold: 0.1
+use_permitted_range: true
+
+posthoc_sparsity_param: 0.5
+run_id: "sp0.5"

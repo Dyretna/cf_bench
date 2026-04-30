@@ -12,6 +12,7 @@ license = {file = "LICENSE"}
 authors = [
     {name = "Roozhin Heydari", email = "heydari.roozhin@gmail.com"},
     {name = "Jesper Anteryd", email = "jesper.anteryd@proton.me"},
+    {name = "Assia Lebot", email = "assialebot2005@gmail.com"},
 ]
 keywords = ["ai", "counterfactuals"]
 classifiers = [

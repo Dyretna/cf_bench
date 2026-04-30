@@ -1,0 +1,26 @@
+# Experiment: lock smoking (cgtsmok)
+# DiCE will never suggest changing smoking habits.
+# Use case: for a person who cannot or will not quit smoking,
+# what OTHER changes would reduce their heart disease risk?
+
+# paths
+train_path: "data/full.csv"
+test_path: "data/cfcheck.csv"
+model_path: "models/xgboost_HL.pkl"
+output_dir: "cf_outputs/feature_locking_tests"
+
+# system config
+target: "hltprhc"
+backend: "sklearn"
+
+# DiCE profile
+explainer_profile: "genetic"
+total_CFs: 20
+stopping_threshold: 0.1
+use_permitted_range: true
+
+posthoc_sparsity_param: 0.1
+
+# Feature locking — cgtsmok (smoking) is locked, DiCE cannot change it
+features_to_lock: ["cgtsmok"]
+run_id: "lock_smoking"
