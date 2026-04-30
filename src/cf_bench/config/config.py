@@ -92,9 +92,9 @@ from dataclasses import dataclass, field
 
 @dataclass
 class SystemConfig:
-    target: str
     backend: str
     model_type: str = "classifier"
+    target: str = "hltprhc"
 
     feature_cols: list[str] = field(
         default_factory=lambda: [

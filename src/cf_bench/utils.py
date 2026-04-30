@@ -1,41 +1,5 @@
 import pandas as pd
 
-from .dice_adapters import BaseRiskEvaluator
-
-
-def annotate_all(
-    risk_evaluator: "BaseRiskEvaluator",
-    cf_results: list,  # Changed: now a list of CounterfactualExamples
-    query_df: pd.DataFrame,
-) -> list[pd.DataFrame]:
-    """
-    Annotate all counterfactual batches.
-
-    Parameters
-    ----------
-    risk_evaluator : RiskEvaluator
-        Evaluator used to compute risk annotations.
-    cf_results : list[dice_ml.CounterfactualExamples]
-        List of counterfactual generation outputs (one per query instance).
-    query_df : pandas.DataFrame
-        Original query instances.
-
-    Returns
-    -------
-    list[pandas.DataFrame]
-        Annotated counterfactuals per query instance.
-    """
-    annotated_batches = []
-
-    # Iterate over the list of CounterfactualExplanations objects
-    for i, cf in enumerate(cf_results):
-        qi = query_df.iloc[[i]]
-        # Access cf_examples_list[0] since we generate one query at a time
-        cf_df = cf.cf_examples_list[0].final_cfs_df
-        annotated_batches.append(risk_evaluator.annotate(qi, cf_df))
-
-    return annotated_batches
-
 
 def build_annotated_batch(query_instances, all_annotated, target):
     """

@@ -1,0 +1,1641 @@
+=== RECOMMENDATIONS ===
+
+Task / Target: hltprhc
+Selected query instance (index query_index    0
+query_index    0
+Name: 0, dtype: object):
+
+etfruit eatveg cgtsmok alcfreq slprl paccnois       bmi dosprt
+      4      3       3       4     2        0 18.986591      0
+
+Original predicted risk (P(hltprhc=0)): 0.0260
+Target-risk threshold: 0.0130
+
+=== Changes per Counterfactual (vs Original) ===
+
+--- cf_id    cf_0
+cf_id    cf_0
+Name: 0, dtype: object ---
+Predicted risk: 0.0707
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 4 → 7
+  - bmi: 18.987 → 18.975
+
+--- cf_id    cf_1
+cf_id    cf_1
+Name: 0, dtype: object ---
+Predicted risk: 0.0050
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - slprl: 2 → 1
+  - bmi: 18.987 → 18.939
+
+--- cf_id    cf_2
+cf_id    cf_2
+Name: 0, dtype: object ---
+Predicted risk: 0.0372
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - etfruit: 4 → 1
+  - bmi: 18.987 → 18.939
+
+--- cf_id    cf_3
+cf_id    cf_3
+Name: 0, dtype: object ---
+Predicted risk: 0.0042
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 18.987 → 18.929
+  - dosprt: 0 → 5
+
+--- cf_id    cf_4
+cf_id    cf_4
+Name: 0, dtype: object ---
+Predicted risk: 0.0154
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 18.987 → 18.675
+  - dosprt: 0 → 7
+
+--- cf_id    cf_5
+cf_id    cf_5
+Name: 0, dtype: object ---
+Predicted risk: 0.0040
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 18.987 → 15.532
+
+--- cf_id    cf_6
+cf_id    cf_6
+Name: 0, dtype: object ---
+Predicted risk: 0.0046
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 4 → 6
+  - bmi: 18.987 → 18.116
+
+--- cf_id    cf_7
+cf_id    cf_7
+Name: 0, dtype: object ---
+Predicted risk: 0.0050
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 3 → 6
+  - bmi: 18.987 → 16.313
+
+--- cf_id    cf_8
+cf_id    cf_8
+Name: 0, dtype: object ---
+Predicted risk: 0.0038
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 4 → 7
+  - bmi: 18.987 → 18.975
+  - dosprt: 0 → 7
+
+--- cf_id    cf_9
+cf_id    cf_9
+Name: 0, dtype: object ---
+Predicted risk: 0.0084
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 3 → 5
+  - bmi: 18.987 → 18.962
+  - dosprt: 0 → 2
+
+--- cf_id    cf_10
+cf_id    cf_10
+Name: 0, dtype: object ---
+Predicted risk: 0.0117
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 4 → 3
+  - bmi: 18.987 → 18.962
+  - dosprt: 0 → 3
+
+--- cf_id    cf_11
+cf_id    cf_11
+Name: 0, dtype: object ---
+Predicted risk: 0.0125
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 4 → 1
+  - bmi: 18.987 → 18.939
+  - dosprt: 0 → 3
+
+--- cf_id    cf_12
+cf_id    cf_12
+Name: 0, dtype: object ---
+Predicted risk: 0.0039
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 4 → 7
+  - bmi: 18.987 → 18.937
+  - dosprt: 0 → 3
+
+--- cf_id    cf_13
+cf_id    cf_13
+Name: 0, dtype: object ---
+Predicted risk: 0.0259
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 3 → 4
+  - bmi: 18.987 → 18.937
+  - dosprt: 0 → 1
+
+--- cf_id    cf_14
+cf_id    cf_14
+Name: 0, dtype: object ---
+Predicted risk: 0.0020
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - slprl: 2 → 1
+  - bmi: 18.987 → 18.937
+  - dosprt: 0 → 5
+
+--- cf_id    cf_15
+cf_id    cf_15
+Name: 0, dtype: object ---
+Predicted risk: 0.0685
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 3 → 6
+  - bmi: 18.987 → 18.930
+  - dosprt: 0 → 4
+
+
+================================================================================
+
+Task / Target: hltprhc
+Selected query instance (index query_index    1
+query_index    1
+Name: 0, dtype: object):
+
+etfruit eatveg cgtsmok alcfreq slprl paccnois      bmi dosprt
+      3      4       1       2     3        0 22.37568      0
+
+Original predicted risk (P(hltprhc=1)): 0.2497
+Target-risk threshold: 0.1249
+
+=== Changes per Counterfactual (vs Original) ===
+
+--- cf_id    cf_0
+cf_id    cf_0
+Name: 0, dtype: object ---
+Predicted risk: 0.0361
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 3 → 2
+  - slprl: 3 → 1
+  - bmi: 22.376 → 22.376
+
+--- cf_id    cf_1
+cf_id    cf_1
+Name: 0, dtype: object ---
+Predicted risk: 0.0754
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - eatveg: 4 → 3
+  - bmi: 22.376 → 22.376
+  - dosprt: 0 → 2
+
+--- cf_id    cf_2
+cf_id    cf_2
+Name: 0, dtype: object ---
+Predicted risk: 0.0691
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - slprl: 3 → 1
+  - bmi: 22.376 → 22.376
+  - dosprt: 0 → 1
+
+--- cf_id    cf_3
+cf_id    cf_3
+Name: 0, dtype: object ---
+Predicted risk: 0.0473
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - eatveg: 4 → 2
+  - bmi: 22.376 → 22.376
+  - dosprt: 0 → 6
+
+--- cf_id    cf_4
+cf_id    cf_4
+Name: 0, dtype: object ---
+Predicted risk: 0.0534
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 2 → 3
+  - slprl: 3 → 1
+  - bmi: 22.376 → 22.376
+
+--- cf_id    cf_5
+cf_id    cf_5
+Name: 0, dtype: object ---
+Predicted risk: 0.0851
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 1 → 2
+  - slprl: 3 → 1
+  - bmi: 22.376 → 22.376
+
+--- cf_id    cf_6
+cf_id    cf_6
+Name: 0, dtype: object ---
+Predicted risk: 0.0302
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - eatveg: 4 → 2
+  - slprl: 3 → 2
+  - bmi: 22.376 → 22.376
+  - dosprt: 0 → 2
+
+--- cf_id    cf_7
+cf_id    cf_7
+Name: 0, dtype: object ---
+Predicted risk: 0.0508
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - eatveg: 4 → 3
+  - slprl: 3 → 1
+  - bmi: 22.376 → 22.376
+  - dosprt: 0 → 4
+
+
+================================================================================
+
+Task / Target: hltprhc
+Selected query instance (index query_index    2
+query_index    2
+Name: 0, dtype: object):
+
+etfruit eatveg cgtsmok alcfreq slprl paccnois       bmi dosprt
+      5      3       1       1     4        0 22.694019      7
+
+Original predicted risk (P(hltprhc=0)): 0.2180
+Target-risk threshold: 0.1090
+
+=== Changes per Counterfactual (vs Original) ===
+
+--- cf_id    cf_0
+cf_id    cf_0
+Name: 0, dtype: object ---
+Predicted risk: 0.0375
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 1
+  - alcfreq: 1 → 3
+  - bmi: 22.694 → 22.680
+
+--- cf_id    cf_1
+cf_id    cf_1
+Name: 0, dtype: object ---
+Predicted risk: 0.0120
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 1
+  - slprl: 4 → 1
+  - bmi: 22.694 → 22.680
+
+--- cf_id    cf_2
+cf_id    cf_2
+Name: 0, dtype: object ---
+Predicted risk: 0.0217
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 1 → 4
+  - slprl: 4 → 1
+  - bmi: 22.694 → 22.676
+
+--- cf_id    cf_3
+cf_id    cf_3
+Name: 0, dtype: object ---
+Predicted risk: 0.0477
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 1
+  - alcfreq: 1 → 2
+  - bmi: 22.694 → 22.676
+
+--- cf_id    cf_4
+cf_id    cf_4
+Name: 0, dtype: object ---
+Predicted risk: 0.0426
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 1 → 3
+  - slprl: 4 → 2
+  - bmi: 22.694 → 22.676
+
+--- cf_id    cf_5
+cf_id    cf_5
+Name: 0, dtype: object ---
+Predicted risk: 0.0241
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 1 → 4
+  - slprl: 4 → 2
+  - bmi: 22.694 → 22.676
+
+--- cf_id    cf_6
+cf_id    cf_6
+Name: 0, dtype: object ---
+Predicted risk: 0.0299
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 1 → 3
+  - slprl: 4 → 1
+  - bmi: 22.694 → 22.351
+
+--- cf_id    cf_7
+cf_id    cf_7
+Name: 0, dtype: object ---
+Predicted risk: 0.0207
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - eatveg: 3 → 1
+  - alcfreq: 1 → 6
+  - bmi: 22.694 → 22.347
+
+--- cf_id    cf_8
+cf_id    cf_8
+Name: 0, dtype: object ---
+Predicted risk: 0.0157
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - eatveg: 3 → 2
+  - alcfreq: 1 → 3
+  - bmi: 22.694 → 22.347
+
+--- cf_id    cf_9
+cf_id    cf_9
+Name: 0, dtype: object ---
+Predicted risk: 0.0369
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 1
+  - bmi: 22.694 → 19.091
+
+--- cf_id    cf_10
+cf_id    cf_10
+Name: 0, dtype: object ---
+Predicted risk: 0.0039
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 1 → 2
+  - slprl: 4 → 1
+  - bmi: 22.694 → 21.324
+
+
+================================================================================
+
+Task / Target: hltprhc
+Selected query instance (index query_index    3
+query_index    3
+Name: 0, dtype: object):
+
+etfruit eatveg cgtsmok alcfreq slprl paccnois       bmi dosprt
+      3      3       6       6     2        0 24.341758      1
+
+Original predicted risk (P(hltprhc=0)): 0.0653
+Target-risk threshold: 0.0327
+
+=== Changes per Counterfactual (vs Original) ===
+
+--- cf_id    cf_0
+cf_id    cf_0
+Name: 0, dtype: object ---
+Predicted risk: 0.0653
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.337
+
+--- cf_id    cf_1
+cf_id    cf_1
+Name: 0, dtype: object ---
+Predicted risk: 0.0369
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.332
+
+--- cf_id    cf_2
+cf_id    cf_2
+Name: 0, dtype: object ---
+Predicted risk: 0.0369
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.305
+
+--- cf_id    cf_3
+cf_id    cf_3
+Name: 0, dtype: object ---
+Predicted risk: 0.0786
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 22.986
+
+--- cf_id    cf_4
+cf_id    cf_4
+Name: 0, dtype: object ---
+Predicted risk: 0.0802
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 6 → 7
+  - bmi: 24.342 → 24.337
+
+--- cf_id    cf_5
+cf_id    cf_5
+Name: 0, dtype: object ---
+Predicted risk: 0.0824
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.337
+  - dosprt: 1 → 4
+
+--- cf_id    cf_6
+cf_id    cf_6
+Name: 0, dtype: object ---
+Predicted risk: 0.0462
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.337
+  - dosprt: 1 → 3
+
+--- cf_id    cf_7
+cf_id    cf_7
+Name: 0, dtype: object ---
+Predicted risk: 0.0617
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.337
+  - dosprt: 1 → 2
+
+--- cf_id    cf_8
+cf_id    cf_8
+Name: 0, dtype: object ---
+Predicted risk: 0.0550
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - slprl: 2 → 1
+  - bmi: 24.342 → 24.337
+
+--- cf_id    cf_9
+cf_id    cf_9
+Name: 0, dtype: object ---
+Predicted risk: 0.0315
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - slprl: 2 → 1
+  - bmi: 24.342 → 24.332
+
+--- cf_id    cf_10
+cf_id    cf_10
+Name: 0, dtype: object ---
+Predicted risk: 0.0441
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.332
+  - dosprt: 1 → 2
+
+--- cf_id    cf_11
+cf_id    cf_11
+Name: 0, dtype: object ---
+Predicted risk: 0.0315
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - slprl: 2 → 1
+  - bmi: 24.342 → 24.314
+
+--- cf_id    cf_12
+cf_id    cf_12
+Name: 0, dtype: object ---
+Predicted risk: 0.0383
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.314
+  - dosprt: 1 → 4
+
+--- cf_id    cf_13
+cf_id    cf_13
+Name: 0, dtype: object ---
+Predicted risk: 0.0441
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.314
+  - dosprt: 1 → 2
+
+--- cf_id    cf_14
+cf_id    cf_14
+Name: 0, dtype: object ---
+Predicted risk: 0.0456
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 6 → 7
+  - bmi: 24.342 → 24.307
+
+--- cf_id    cf_15
+cf_id    cf_15
+Name: 0, dtype: object ---
+Predicted risk: 0.0985
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.307
+  - dosprt: 1 → 7
+
+--- cf_id    cf_16
+cf_id    cf_16
+Name: 0, dtype: object ---
+Predicted risk: 0.0456
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 6 → 7
+  - bmi: 24.342 → 24.305
+
+--- cf_id    cf_17
+cf_id    cf_17
+Name: 0, dtype: object ---
+Predicted risk: 0.0985
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 24.342 → 24.302
+  - dosprt: 1 → 7
+
+
+================================================================================
+
+Task / Target: hltprhc
+Selected query instance (index query_index    4
+query_index    4
+Name: 0, dtype: object):
+
+etfruit eatveg cgtsmok alcfreq slprl paccnois       bmi dosprt
+      5      4       2       7     1        0 21.258503      3
+
+Original predicted risk (P(hltprhc=0)): 0.0811
+Target-risk threshold: 0.0406
+
+=== Changes per Counterfactual (vs Original) ===
+
+--- cf_id    cf_0
+cf_id    cf_0
+Name: 0, dtype: object ---
+Predicted risk: 0.0141
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_1
+cf_id    cf_1
+Name: 0, dtype: object ---
+Predicted risk: 0.0050
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 2 → 5
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_2
+cf_id    cf_2
+Name: 0, dtype: object ---
+Predicted risk: 0.0143
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 2 → 3
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_3
+cf_id    cf_3
+Name: 0, dtype: object ---
+Predicted risk: 0.0327
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 2 → 6
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_4
+cf_id    cf_4
+Name: 0, dtype: object ---
+Predicted risk: 0.0113
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 3
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_5
+cf_id    cf_5
+Name: 0, dtype: object ---
+Predicted risk: 0.0081
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 4
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_6
+cf_id    cf_6
+Name: 0, dtype: object ---
+Predicted risk: 0.0160
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - eatveg: 4 → 3
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_7
+cf_id    cf_7
+Name: 0, dtype: object ---
+Predicted risk: 0.0041
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - eatveg: 4 → 1
+  - bmi: 21.259 → 21.259
+  - dosprt: 3 → 5
+
+--- cf_id    cf_8
+cf_id    cf_8
+Name: 0, dtype: object ---
+Predicted risk: 0.0099
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 4
+  - cgtsmok: 2 → 6
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_9
+cf_id    cf_9
+Name: 0, dtype: object ---
+Predicted risk: 0.0058
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 4
+  - cgtsmok: 2 → 4
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_10
+cf_id    cf_10
+Name: 0, dtype: object ---
+Predicted risk: 0.0107
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 4
+  - bmi: 21.259 → 21.259
+  - dosprt: 3 → 4
+
+--- cf_id    cf_11
+cf_id    cf_11
+Name: 0, dtype: object ---
+Predicted risk: 0.0168
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 2 → 6
+  - bmi: 21.259 → 21.259
+  - dosprt: 3 → 5
+
+--- cf_id    cf_12
+cf_id    cf_12
+Name: 0, dtype: object ---
+Predicted risk: 0.0183
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 3
+  - eatveg: 4 → 2
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_13
+cf_id    cf_13
+Name: 0, dtype: object ---
+Predicted risk: 0.0167
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 3
+  - eatveg: 4 → 3
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_14
+cf_id    cf_14
+Name: 0, dtype: object ---
+Predicted risk: 0.0169
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 2
+  - cgtsmok: 2 → 6
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_15
+cf_id    cf_15
+Name: 0, dtype: object ---
+Predicted risk: 0.0614
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - eatveg: 4 → 1
+  - cgtsmok: 2 → 4
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_16
+cf_id    cf_16
+Name: 0, dtype: object ---
+Predicted risk: 0.0249
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 1
+  - eatveg: 4 → 2
+  - bmi: 21.259 → 21.259
+
+--- cf_id    cf_17
+cf_id    cf_17
+Name: 0, dtype: object ---
+Predicted risk: 0.0435
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - etfruit: 5 → 2
+  - eatveg: 4 → 1
+  - bmi: 21.259 → 21.259
+
+
+================================================================================
+
+Task / Target: hltprhc
+Selected query instance (index query_index    5
+query_index    5
+Name: 0, dtype: object):
+
+etfruit eatveg cgtsmok alcfreq slprl paccnois       bmi dosprt
+      2      2       1       2     4        0 27.990363      0
+
+Original predicted risk (P(hltprhc=0)): 0.0484
+Target-risk threshold: 0.0242
+
+=== Changes per Counterfactual (vs Original) ===
+
+--- cf_id    cf_0
+cf_id    cf_0
+Name: 0, dtype: object ---
+Predicted risk: 0.0484
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.990 → 27.990
+
+--- cf_id    cf_1
+cf_id    cf_1
+Name: 0, dtype: object ---
+Predicted risk: 0.0401
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - slprl: 4 → 1
+  - bmi: 27.990 → 27.990
+
+--- cf_id    cf_2
+cf_id    cf_2
+Name: 0, dtype: object ---
+Predicted risk: 0.0848
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 2 → 7
+  - bmi: 27.990 → 27.990
+
+--- cf_id    cf_3
+cf_id    cf_3
+Name: 0, dtype: object ---
+Predicted risk: 0.0276
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - etfruit: 2 → 1
+  - slprl: 4 → 3
+  - bmi: 27.990 → 27.990
+
+--- cf_id    cf_4
+cf_id    cf_4
+Name: 0, dtype: object ---
+Predicted risk: 0.0100
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 2 → 1
+  - bmi: 27.990 → 27.990
+  - dosprt: 0 → 3
+
+--- cf_id    cf_5
+cf_id    cf_5
+Name: 0, dtype: object ---
+Predicted risk: 0.0286
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - slprl: 4 → 1
+  - bmi: 27.990 → 27.990
+  - dosprt: 0 → 3
+
+--- cf_id    cf_6
+cf_id    cf_6
+Name: 0, dtype: object ---
+Predicted risk: 0.0430
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - slprl: 4 → 2
+  - bmi: 27.990 → 27.990
+  - dosprt: 0 → 7
+
+--- cf_id    cf_7
+cf_id    cf_7
+Name: 0, dtype: object ---
+Predicted risk: 0.0343
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 2 → 5
+  - slprl: 4 → 1
+  - bmi: 27.990 → 27.990
+
+--- cf_id    cf_8
+cf_id    cf_8
+Name: 0, dtype: object ---
+Predicted risk: 0.0852
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 1 → 6
+  - slprl: 4 → 1
+  - bmi: 27.990 → 27.990
+
+--- cf_id    cf_9
+cf_id    cf_9
+Name: 0, dtype: object ---
+Predicted risk: 0.0680
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 2 → 7
+  - slprl: 4 → 1
+  - bmi: 27.990 → 27.990
+
+--- cf_id    cf_10
+cf_id    cf_10
+Name: 0, dtype: object ---
+Predicted risk: 0.0371
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 1 → 2
+  - bmi: 27.990 → 27.990
+  - dosprt: 0 → 2
+
+--- cf_id    cf_11
+cf_id    cf_11
+Name: 0, dtype: object ---
+Predicted risk: 0.0918
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - cgtsmok: 1 → 2
+  - alcfreq: 2 → 7
+  - bmi: 27.990 → 27.990
+
+
+================================================================================
+
+Task / Target: hltprhc
+Selected query instance (index query_index    6
+query_index    6
+Name: 0, dtype: object):
+
+etfruit eatveg cgtsmok alcfreq slprl paccnois       bmi dosprt
+      2      3       5       4     1        0 27.681661      4
+
+Original predicted risk (P(hltprhc=0)): 0.0539
+Target-risk threshold: 0.0270
+
+=== Changes per Counterfactual (vs Original) ===
+
+--- cf_id    cf_0
+cf_id    cf_0
+Name: 0, dtype: object ---
+Predicted risk: 0.0318
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 26.679
+
+--- cf_id    cf_1
+cf_id    cf_1
+Name: 0, dtype: object ---
+Predicted risk: 0.0364
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 26.068
+
+--- cf_id    cf_2
+cf_id    cf_2
+Name: 0, dtype: object ---
+Predicted risk: 0.0216
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 25.700
+
+--- cf_id    cf_3
+cf_id    cf_3
+Name: 0, dtype: object ---
+Predicted risk: 0.0517
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 25.659
+
+--- cf_id    cf_4
+cf_id    cf_4
+Name: 0, dtype: object ---
+Predicted risk: 0.0412
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 25.482
+
+--- cf_id    cf_5
+cf_id    cf_5
+Name: 0, dtype: object ---
+Predicted risk: 0.0389
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 25.159
+
+--- cf_id    cf_6
+cf_id    cf_6
+Name: 0, dtype: object ---
+Predicted risk: 0.0811
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 25.011
+
+--- cf_id    cf_7
+cf_id    cf_7
+Name: 0, dtype: object ---
+Predicted risk: 0.0383
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 24.824
+
+--- cf_id    cf_8
+cf_id    cf_8
+Name: 0, dtype: object ---
+Predicted risk: 0.0458
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 24.782
+
+--- cf_id    cf_9
+cf_id    cf_9
+Name: 0, dtype: object ---
+Predicted risk: 0.0930
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 27.539
+  - dosprt: 4 → 7
+
+--- cf_id    cf_10
+cf_id    cf_10
+Name: 0, dtype: object ---
+Predicted risk: 0.0329
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 4 → 6
+  - bmi: 27.682 → 27.471
+
+--- cf_id    cf_11
+cf_id    cf_11
+Name: 0, dtype: object ---
+Predicted risk: 0.0181
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 24.413
+
+--- cf_id    cf_12
+cf_id    cf_12
+Name: 0, dtype: object ---
+Predicted risk: 0.0045
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - eatveg: 3 → 1
+  - bmi: 27.682 → 27.380
+
+--- cf_id    cf_13
+cf_id    cf_13
+Name: 0, dtype: object ---
+Predicted risk: 0.0268
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 24.324
+
+--- cf_id    cf_14
+cf_id    cf_14
+Name: 0, dtype: object ---
+Predicted risk: 0.0620
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 27.059
+  - dosprt: 4 → 7
+
+--- cf_id    cf_15
+cf_id    cf_15
+Name: 0, dtype: object ---
+Predicted risk: 0.0267
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 27.682 → 23.828
+
+--- cf_id    cf_16
+cf_id    cf_16
+Name: 0, dtype: object ---
+Predicted risk: 0.0431
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 4 → 7
+  - bmi: 27.682 → 26.748
+
+--- cf_id    cf_17
+cf_id    cf_17
+Name: 0, dtype: object ---
+Predicted risk: 0.0244
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 4 → 6
+  - bmi: 27.682 → 26.720
+
+--- cf_id    cf_18
+cf_id    cf_18
+Name: 0, dtype: object ---
+Predicted risk: 0.0454
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 4 → 5
+  - bmi: 27.682 → 26.646
+
+
+================================================================================
+
+Task / Target: hltprhc
+Selected query instance (index query_index    7
+query_index    7
+Name: 0, dtype: object):
+
+etfruit eatveg cgtsmok alcfreq slprl paccnois       bmi dosprt
+      2      3       6       3     1        0 20.438166      2
+
+Original predicted risk (P(hltprhc=0)): 0.0565
+Target-risk threshold: 0.0283
+
+=== Changes per Counterfactual (vs Original) ===
+
+--- cf_id    cf_0
+cf_id    cf_0
+Name: 0, dtype: object ---
+Predicted risk: 0.0853
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 20.428
+
+--- cf_id    cf_1
+cf_id    cf_1
+Name: 0, dtype: object ---
+Predicted risk: 0.0853
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 20.403
+
+--- cf_id    cf_2
+cf_id    cf_2
+Name: 0, dtype: object ---
+Predicted risk: 0.0853
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 20.395
+
+--- cf_id    cf_3
+cf_id    cf_3
+Name: 0, dtype: object ---
+Predicted risk: 0.0853
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 20.382
+
+--- cf_id    cf_4
+cf_id    cf_4
+Name: 0, dtype: object ---
+Predicted risk: 0.0853
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 20.380
+
+--- cf_id    cf_5
+cf_id    cf_5
+Name: 0, dtype: object ---
+Predicted risk: 0.0853
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 20.370
+
+--- cf_id    cf_6
+cf_id    cf_6
+Name: 0, dtype: object ---
+Predicted risk: 0.0089
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 19.962
+
+--- cf_id    cf_7
+cf_id    cf_7
+Name: 0, dtype: object ---
+Predicted risk: 0.0078
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 19.644
+
+--- cf_id    cf_8
+cf_id    cf_8
+Name: 0, dtype: object ---
+Predicted risk: 0.0029
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 19.395
+
+--- cf_id    cf_9
+cf_id    cf_9
+Name: 0, dtype: object ---
+Predicted risk: 0.0034
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 18.690
+
+--- cf_id    cf_10
+cf_id    cf_10
+Name: 0, dtype: object ---
+Predicted risk: 0.0029
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 18.548
+
+--- cf_id    cf_11
+cf_id    cf_11
+Name: 0, dtype: object ---
+Predicted risk: 0.0003
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 17.880
+
+--- cf_id    cf_12
+cf_id    cf_12
+Name: 0, dtype: object ---
+Predicted risk: 0.0003
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 17.839
+
+--- cf_id    cf_13
+cf_id    cf_13
+Name: 0, dtype: object ---
+Predicted risk: 0.0532
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - alcfreq: 3 → 7
+  - bmi: 20.438 → 20.429
+
+--- cf_id    cf_14
+cf_id    cf_14
+Name: 0, dtype: object ---
+Predicted risk: 0.0553
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 20.428
+  - dosprt: 2 → 4
+
+--- cf_id    cf_15
+cf_id    cf_15
+Name: 0, dtype: object ---
+Predicted risk: 0.0389
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - bmi: 20.438 → 20.428
+  - dosprt: 2 → 5
+
+--- cf_id    cf_16
+cf_id    cf_16
+Name: 0, dtype: object ---
+Predicted risk: 0.0342
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - eatveg: 3 → 2
+  - bmi: 20.438 → 20.428
+
+
+================================================================================
+
+Task / Target: hltprhc
+Selected query instance (index query_index    8
+query_index    8
+Name: 0, dtype: object):
+
+etfruit eatveg cgtsmok alcfreq slprl paccnois       bmi dosprt
+      6      4       1       1     1        0 26.014568      0
+
+Original predicted risk (P(hltprhc=1)): 0.1216
+Target-risk threshold: 0.0608
+
+=== Changes per Counterfactual (vs Original) ===
+
+--- cf_id    cf_0
+cf_id    cf_0
+Name: 0, dtype: object ---
+Predicted risk: 0.0435
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 4
+  - alcfreq: 1 → 6
+  - bmi: 26.015 → 26.004
+
+--- cf_id    cf_1
+cf_id    cf_1
+Name: 0, dtype: object ---
+Predicted risk: 0.0529
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 3
+  - alcfreq: 1 → 5
+  - bmi: 26.015 → 26.004
+
+--- cf_id    cf_2
+cf_id    cf_2
+Name: 0, dtype: object ---
+Predicted risk: 0.0669
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 4
+  - alcfreq: 1 → 6
+  - bmi: 26.015 → 25.692
+
+--- cf_id    cf_3
+cf_id    cf_3
+Name: 0, dtype: object ---
+Predicted risk: 0.0090
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 2
+  - eatveg: 4 → 1
+  - bmi: 26.015 → 25.590
+
+--- cf_id    cf_4
+cf_id    cf_4
+Name: 0, dtype: object ---
+Predicted risk: 0.0511
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 3
+  - eatveg: 4 → 3
+  - bmi: 26.015 → 25.130
+
+--- cf_id    cf_5
+cf_id    cf_5
+Name: 0, dtype: object ---
+Predicted risk: 0.0533
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 1
+  - alcfreq: 1 → 7
+  - bmi: 26.015 → 24.173
+
+--- cf_id    cf_6
+cf_id    cf_6
+Name: 0, dtype: object ---
+Predicted risk: 0.0613
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 1
+  - alcfreq: 1 → 4
+  - bmi: 26.015 → 24.173
+
+--- cf_id    cf_7
+cf_id    cf_7
+Name: 0, dtype: object ---
+Predicted risk: 0.0035
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 1
+  - eatveg: 4 → 1
+  - bmi: 26.015 → 24.173
+
+--- cf_id    cf_8
+cf_id    cf_8
+Name: 0, dtype: object ---
+Predicted risk: 0.0697
+Meets target:   valid    False
+valid    False
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 2
+  - alcfreq: 1 → 7
+  - bmi: 26.015 → 26.004
+  - dosprt: 0 → 3
+
+--- cf_id    cf_9
+cf_id    cf_9
+Name: 0, dtype: object ---
+Predicted risk: 0.0184
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 3
+  - alcfreq: 1 → 6
+  - bmi: 26.015 → 26.004
+  - dosprt: 0 → 3
+
+--- cf_id    cf_10
+cf_id    cf_10
+Name: 0, dtype: object ---
+Predicted risk: 0.0301
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 3
+  - eatveg: 4 → 3
+  - alcfreq: 1 → 3
+  - bmi: 26.015 → 26.004
+
+--- cf_id    cf_11
+cf_id    cf_11
+Name: 0, dtype: object ---
+Predicted risk: 0.0088
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 4
+  - alcfreq: 1 → 2
+  - bmi: 26.015 → 26.004
+  - dosprt: 0 → 3
+
+--- cf_id    cf_12
+cf_id    cf_12
+Name: 0, dtype: object ---
+Predicted risk: 0.0447
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - etfruit: 6 → 4
+  - alcfreq: 1 → 3
+  - bmi: 26.015 → 26.004
+  - dosprt: 0 → 7
+
+--- cf_id    cf_13
+cf_id    cf_13
+Name: 0, dtype: object ---
+Predicted risk: 0.0034
+Meets target:   valid    True
+valid    True
+Name: 0, dtype: object
+Changes:
+  - bmi: 26.015 → 16.626
+
+
+================================================================================

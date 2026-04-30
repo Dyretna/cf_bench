@@ -1,4 +1,5 @@
 from .build_explainer import SanitizedModel, build_explainer
+from .recommendations import DiceRecommender
 from .risk import BaseRiskEvaluator, build_risk_evaluator
 
 __all__ = [

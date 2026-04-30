@@ -5,11 +5,10 @@ model_path: "models/rf_hltprhc.pkl"
 output_dir: "cf_outputs"
 
 # system config
-target: "hltprhc"
 backend: "sklearn"
 
 # profile, eg. DiCE model
-explainer_profile: "random"   # "random" or "genetic"
+explainer_profile: "genetic"   # "random" or "genetic"
 total_CFs: 10
 stopping_threshold: 0.9
-use_permitted_range: false  # Random Forest works better without permitted range constraints
+use_permitted_range: true  # use with genetic

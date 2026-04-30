@@ -1,6 +1,5 @@
 """Data transformation utilities for scaling and dtype conversion."""
 
-from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional, Tuple
 
 import joblib
@@ -8,20 +7,6 @@ import pandas as pd
 
 if TYPE_CHECKING:
     from ..config import SystemConfig
-
-
-class DataTransformer(ABC):
-    """Base class for data transformations."""
-
-    @abstractmethod
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform data."""
-        pass
-
-    @abstractmethod
-    def inverse_transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Inverse transform data back to original space."""
-        pass
 
 
 class FeatureScaler:

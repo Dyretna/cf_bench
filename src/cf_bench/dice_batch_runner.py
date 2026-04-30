@@ -7,9 +7,13 @@
 #   It runs the full counterfactual generation pipeline for a batch of people
 #   (one person at a time in a loop), then saves the results to CSV.
 #
+# WHAT IS A BATCH?
+#   Instead of running DiCE for just one person, we run it for all people
+#   in the test dataset (cfcheck.csv). "Batch" = many people at once.
+#
 # HOW TO USE:
 #   Called via the CLI:
-#     python -m cf_bench.cli --config configs/rf_hltprhc_cfcheck.yaml
+#     python -m cf_bench.cli --config configs/xgboost_genetic_sparsity_01.yaml
 #   The YAML config file specifies which model, data, and algorithm to use.
 #
 # PIPELINE STEPS (in order):
@@ -26,9 +30,9 @@
 #
 # OUTPUT:
 #   A folder in cf_outputs/ containing:
-#     - random_annotated_hltprhc.csv  → the main results table
-#     - config_*.txt                  → settings used for this run
-#     - model_*_info.json/.txt        → model details and accuracy
+#     - annotated.csv       → the main results table
+#     - config_*.txt        → settings used for this run
+#     - model_info.json/txt → model details and accuracy
 # =============================================================================
 
 
@@ -57,10 +61,11 @@ from .results.exporters import (
 )
 from .results.metrics import PerformanceMetrics
 from .results.model_info_extractors import extract_model_info
-from .results.predictions import ModelPredictor
-from .utils import annotate_all, build_annotated_batch
+from .results.predictions import predict_model
+from .utils import build_annotated_batch
 
 logger = logging.getLogger(__name__)
+
 
 # --------------------------------------------------------------------------
 # DiCE random explainer triggers Pandas FutureWarnings due to
@@ -81,149 +86,320 @@ PROFILE_MAP = {
     "gradient": GradientExplainerProfile,
 }
 
-# --------------------------------------------------------------------------
-# Run the batch pipeline
-# --------------------------------------------------------------------------
 
+class BatchRunner:
+    """Orchestrates counterfactual generation pipeline."""
 
-def run_pipeline(cfg):
-    """Main runner: orchestrates data loading, CF generation, annotation and export."""
+    def __init__(self, cfg):
+        # Store config values as attributes
+        self.train_path = cfg["train_path"]
+        self.test_path = cfg["test_path"]
+        self.model_path = cfg["model_path"]
+        self.scaler_path = cfg.get("scaler_path")
+        self.output_dir = cfg["output_dir"]
+        self.backend = cfg["backend"]
+        self.explainer_profile_name = cfg["explainer_profile"]
+        self.total_CFs = cfg["total_CFs"]
+        self.stopping_threshold = cfg["stopping_threshold"]
+        self.use_permitted_range = cfg.get("use_permitted_range", True)
 
-    logger.info(f"Starting counterfactual pipeline for target: {cfg['target']}")
-    logger.info(f"Explainer profile: {cfg['explainer_profile']}")
+        # --- Feature locking ---
+        # Features listed in features_to_lock will NOT be changed by DiCE.
+        # Example YAML: features_to_lock: ["cgtsmok", "bmi"]
+        # Use case: person who cannot quit smoking → lock cgtsmok → DiCE finds other changes.
+        self.features_to_lock = cfg.get("features_to_lock", [])
 
-    # --- Configuration and model ---
-    # SystemConfig is a "rulebook" for this experiment: which features exist,
-    # which are ordinal (survey categories), which can be changed by DiCE, etc.
-    config = SystemConfig(target=cfg["target"], backend=cfg["backend"])
+        # --- Sparsity parameter ---
+        # Controls post-processing: higher = fewer features changed per CF.
+        # 0.1 = minimal trimming (many features can change)
+        # 0.9 = aggressive trimming (as few features as possible change)
+        self.posthoc_sparsity_param = cfg.get("posthoc_sparsity_param", 0.1)
 
-    # Load the trained model from disk.
-    # joblib is used for sklearn models (Random Forest, XGBoost).
-    # Keras (TF2) is used for neural networks and needs a different loader.
-    if config.backend == "TF2":
-        import tensorflow as tf
+        # --- Run identifier ---
+        # Optional label appended to the output folder name to distinguish runs.
+        # Example YAML: run_id: "sp0.5"  → folder: XGBoost_genetic_prange_lowthres_2026-04-30_sp0.5
+        self.run_id = cfg.get("run_id")
 
-        model = tf.keras.models.load_model(cfg["model_path"])
-        is_keras = True
-    else:
-        model = joblib.load(cfg["model_path"])
-        is_keras = False
+        # System config is the "rulebook": which features exist, which are ordinal,
+        # which can be changed by DiCE, etc.
+        self.config = SystemConfig(backend=self.backend)
 
-    # --- Data loading ---
-    # We need TWO datasets:
-    #   df_training_for_dice → DiCE uses this to learn what feature values are realistic
-    #                          (e.g. BMI ranges from 18-40 in training data → won't suggest BMI=200)
-    #   df_raw               → the actual people we want to generate CFs for (test set)
-    df_traning_for_dice = load_dice_compatible_data(cfg["train_path"], config)
-    df_raw = load_dice_compatible_data(cfg["test_path"], config)
+        # Build the filtered features_to_vary list (all features except locked ones)
+        features_to_vary = [
+            f for f in self.config.features_to_vary
+            if f not in self.features_to_lock
+        ]
+        if self.features_to_lock:
+            logger.info(f"Locked features (DiCE will not change): {self.features_to_lock}")
+            logger.info(f"Features DiCE can vary: {features_to_vary}")
 
-    # --- Optional scaling (for Keras/neural network models only) ---
-    # Neural networks require all features to be on the same small scale (0-1).
-    # Example: BMI=28 and alcfreq=3 are very different magnitudes — scaling fixes this.
-    # Random Forest and XGBoost do NOT need scaling, so this block is skipped for them.
-    if is_keras:
-        scaler = joblib.load(cfg["scaler_path"])
-        feature_scaler = FeatureScaler(scaler, config)
-        model_input_df = feature_scaler.transform(df_raw, convert_ordinals=True)
-    else:
-        model_input_df = df_raw
-        scaler = None
+        # Load model from disk (no training happens here — model was pre-trained)
+        self.model, self.is_keras, self.scaler = self._load_model()
 
-    # --- Query instances preparation for DiCE ---
-    # A "query instance" = one specific person we want a counterfactual for.
-    # DiCE is very strict about data types — this step formats each person's
-    # data to match exactly what DiCE expects (e.g. ordinal values as strings).
-    preparer = QueryInstancePreparer(config)
-    query_df = preparer.prepare(model_input_df, df_traning_for_dice)
+        # Create explainer profile
+        # (DiCE Search Algorithm: "random" | "genetic" | "gradient", + params)
+        profile_cls = PROFILE_MAP[self.explainer_profile_name]
+        self.explainer_profile: BaseExplainerProfile = profile_cls(
+            features_to_vary=features_to_vary,
+            ordinal_allowed_values=self.config.ordinal_allowed_values,
+            total_CFs=self.total_CFs,
+            stopping_threshold=self.stopping_threshold,
+            use_permitted_range=self.use_permitted_range,
+            posthoc_sparsity_param=self.posthoc_sparsity_param,
+        )
 
-    # --- Prepare numeric reference for SanitizedModel ---
-    # TYPE MISMATCH PROBLEM:
-    #   DiCE treats ordinal survey features (etfruit, cgtsmok, etc.) as STRINGS
-    #   internally, because it handles them like categories ("3", "4", "6"...).
-    #   But the Random Forest model expects NUMBERS (3, 4, 6...).
-    #
-    # SOLUTION: keep two versions of the data:
-    #   model_input_df         → strings  → for DiCE
-    #   model_input_df_numeric → numbers  → for the RF/XGBoost model
-    #
-    # SanitizedModel is a thin wrapper around the real model.
-    # When DiCE passes it string data, SanitizedModel converts to numbers first.
-    model_input_df_numeric = model_input_df.copy()
-    for col in config.ordinal_features:
-        if col in model_input_df_numeric.columns:
-            model_input_df_numeric[col] = pd.to_numeric(model_input_df_numeric[col])
+    def run(self):
+        """Main runner: orchestrates data loading, CF generation, annotation and export."""
 
-    logger.debug("model_input_df dtypes (for SanitizedModel):")
-    for col in config.feature_cols:
-        if col in model_input_df_numeric.columns:
-            logger.debug(f"  {col}: {model_input_df_numeric[col].dtype}")
+        logger.info("Starting counterfactual pipeline")
+        logger.info(f"Predictor model: {type(self.model).__name__}")
+        logger.info(f"Explainer profile: {self.explainer_profile_name}")
+        logger.info(f"stopping threshold: {self.stopping_threshold}")
+        logger.info(f"Sparsity param: {self.posthoc_sparsity_param}")
+        if self.features_to_lock:
+            logger.info(f"Locked features: {self.features_to_lock}")
 
-    logger.debug("DiCE dtype consistency check:")
-    logger.debug(
-        f"Training data dtype (etfruit): {df_traning_for_dice['etfruit'].dtype}"
-    )
-    logger.debug(f"Query data dtype (etfruit): {query_df['etfruit'].dtype}")
-    logger.debug(
-        "Training unique values (etfruit): "
-        f"{sorted(df_traning_for_dice['etfruit'].unique())}"
-    )
-    logger.debug(
-        f"Query unique values (etfruit): {sorted(query_df['etfruit'].unique())}"
-    )
+        config = self.config
 
-    # --- Explainer profile selection ---
-    # Pick the search algorithm from the config (random / genetic / gradient).
-    # The profile also carries all DiCE parameters:
-    #   features_to_vary   → which features DiCE is allowed to change
-    #   total_CFs          → how many counterfactuals to generate per person
-    #   stopping_threshold → stop early if CF risk drops below this fraction of original risk
-    #   use_permitted_range → whether to enforce realistic value bounds per feature
-    profile_cls = PROFILE_MAP[cfg["explainer_profile"]]
+        # --- Data loading ---
+        # We need TWO datasets:
+        #   df_training_for_dice → DiCE uses this to learn what feature values are realistic
+        #   df_raw               → the actual people we want to generate CFs for (test set)
+        df_traning_for_dice = load_dice_compatible_data(self.train_path, config)
+        df_raw = load_dice_compatible_data(self.test_path, config)
 
-    explainer_profile: BaseExplainerProfile = profile_cls(
-        features_to_vary=config.features_to_vary,
-        ordinal_allowed_values=config.ordinal_allowed_values,
-        total_CFs=cfg["total_CFs"],
-        stopping_threshold=cfg["stopping_threshold"],
-        use_permitted_range=cfg.get("use_permitted_range", True),  # Default to True
-    )
+        # --- Optional scaling (for Keras/neural network models only) ---
+        # Neural networks require all features on the same small scale (0-1).
+        # Random Forest and XGBoost do NOT need scaling.
+        if self.is_keras:
+            feature_scaler = FeatureScaler(self.scaler, config)
+            model_input_df = feature_scaler.transform(df_raw, convert_ordinals=True)
+        else:
+            model_input_df = df_raw
 
-    # --------------------------------------------------------------------------
-    # Build DiCE explainer
-    # --------------------------------------------------------------------------
-    # build_explainer creates the DiCE object that will generate counterfactuals.
-    # DiCE needs to know: the model, the training data (for feature bounds),
-    # and which search method to use (random / genetic / gradient).
-    # The numeric version of the data is passed here because DiCE uses it
-    # only as a dtype reference — the actual search uses string ordinals.
-    explainer = build_explainer(
-        config=config,
-        predictor_model=model,
-        model_input_df=model_input_df_numeric,  # Use numeric version for dtype reference
-        training_df=df_traning_for_dice,
-        explainer_method=explainer_profile.method,
-    )
+        # --- Query instances preparation for DiCE ---
+        # A "query instance" = one specific person we want a counterfactual for.
+        # DiCE is very strict about data types — this step formats each person's
+        # data to match exactly what DiCE expects (e.g. ordinal values as strings).
+        preparer = QueryInstancePreparer(self.config)
+        query_df = preparer.prepare(model_input_df, df_traning_for_dice)
 
-    # --------------------------------------------------------------------------
-    # Main loop: generate counterfactuals for each person in the test set
-    # --------------------------------------------------------------------------
-    # We process one person at a time (not all at once) because:
-    #   - DiCE needs per-row "permitted ranges" (directional bounds per person)
-    #   - We time each person individually for performance analysis
-    #
-    # For each person:
-    #   single_query = that person's features formatted as a 1-row dataframe
-    #   cf           = DiCE's result: a list of modified versions of the person
-    #                  where the model predicts a better health outcome
-    logger.info(f"Generating counterfactuals for {len(query_df)} instances...")
-    cf_results = []
-    cf_times = []  # time taken per person, becomes cf_gen_time_sec in the CSV
+        # --- Prepare numeric reference for SanitizedModel ---
+        # TYPE MISMATCH PROBLEM:
+        #   DiCE treats ordinal features as STRINGS ("3", "4"...).
+        #   But Random Forest / XGBoost expect NUMBERS (3, 4...).
+        # SOLUTION: keep two versions:
+        #   model_input_df         → strings → for DiCE
+        #   model_input_df_numeric → numbers → for the model via SanitizedModel
+        model_input_df_numeric = model_input_df.copy()
+        for col in config.ordinal_features:
+            if col in model_input_df_numeric.columns:
+                model_input_df_numeric[col] = pd.to_numeric(model_input_df_numeric[col])
 
-    for idx, row in query_df.iterrows():
-        # Convert this single row to a 1-row dataframe (DiCE requires a dataframe, not a Series)
-        single_query = row.to_frame().T
+        self._log_model_input_dtypes(model_input_df_numeric, config.feature_cols)
+        self._log_dtype_consistency(df_traning_for_dice, query_df)
 
-        # Debug: show current query values and training data coverage
+        # --------------------------------------------------------------------------
+        # Build DiCE explainer
+        # --------------------------------------------------------------------------
+        # build_explainer creates the DiCE object that will generate counterfactuals.
+        # DiCE needs: the model, the training data (for feature bounds),
+        # and which search method to use (random / genetic / gradient).
+        explainer = build_explainer(
+            config=config,
+            predictor_model=self.model,
+            model_input_df=model_input_df_numeric,
+            training_df=df_traning_for_dice,
+            explainer_method=self.explainer_profile.method,
+        )
+
+        # --------------------------------------------------------------------------
+        # Main loop: generate counterfactuals for each person in the test set
+        # --------------------------------------------------------------------------
+        # We process one person at a time because DiCE needs per-row permitted ranges.
+        # For each person:
+        #   single_query = that person's features as a 1-row dataframe
+        #   cf           = DiCE's result: modified versions where prediction improves
+        logger.info(f"Generating counterfactuals for {len(query_df)} instances...")
+        cf_results = []
+        cf_times = []  # time taken per person, becomes cf_gen_time_sec in the CSV
+
+        for idx, row in query_df.iterrows():
+            single_query = row.to_frame().T
+            self._log_query_and_training_coverage(idx, row, config, df_traning_for_dice)
+            # Time CF generation for this instance
+            start_time = time.perf_counter()
+            cf = explainer.generate_counterfactuals(
+                query_instances=single_query,
+                **self.explainer_profile.to_cf_params_for_row(row),
+            )
+            end_time = time.perf_counter()
+            cf_results.append(cf)
+            cf_times.append(end_time - start_time)
+
+        # ---------------------------------------------------------------------------
+        # Risk evaluation
+        # ---------------------------------------------------------------------------
+        # DiCE returns counterfactuals but does NOT compute the actual risk percentage.
+        # We pass each CF back through the model to get:
+        #   risk_before          → original person's risk (e.g. 6.3%)
+        #   target_risk          → goal (set to half of risk_before by default)
+        #   predicted_risk_after → risk after applying the CF (e.g. 2.0%)
+        #   valid                → True if predicted_risk_after is below target_risk
+        #
+        # SanitizedModel wraps the real model and handles the string→number conversion.
+        if self.backend == "sklearn":
+            model_for_risk = SanitizedModel(self.model, model_input_df_numeric)
+        else:
+            model_for_risk = self.model
+
+        risk_evaluator = build_risk_evaluator(
+            backend=self.backend,
+            model=model_for_risk,
+            feature_cols=config.feature_cols,
+            target_factor=config.target_factor,
+        )
+
+        # annotate_all → adds risk_before, predicted_risk_after, and valid to each CF
+        all_annotated = risk_evaluator.annotate_all(cf_results, query_df)
+
+        # ----------------------------------------------------------------------
+        # Assemble the final output table
+        # ----------------------------------------------------------------------
+        # build_annotated_batch creates the CSV structure:
+        #   - one "original" row per person (their actual feature values + risk)
+        #   - one "cf_1", "cf_2", ... row per counterfactual (only changed features shown)
+        # Empty cells in CF rows mean that feature was NOT changed by this CF.
+        annotated_batch = build_annotated_batch(
+            query_instances=query_df,
+            all_annotated=all_annotated,
+            target=config.target,
+        )
+
+        # Add CF generation time per instance to annotated batch
+        # Only set timing for 'original' rows (one time per query instance)
+        time_mapping = {
+            idx: round(time, 2) for idx, time in zip(query_df.index, cf_times)
+        }
+        annotated_batch["cf_gen_time_sec"] = annotated_batch.apply(
+            lambda row: time_mapping.get(row["query_index"])
+            if row["cf_id"] == "original"
+            else None,
+            axis=1,
+        )
+
+        # Inverse scale if needed (neural network models only)
+        # Convert scaled values back to real units (e.g. BMI=0.4 → BMI=24)
+        if self.scaler is not None:
+            feature_scaler = FeatureScaler(self.scaler, config)
+            annotated_batch = feature_scaler.inverse_transform(
+                annotated_batch,
+                feature_cols=config.feature_cols,
+            )
+
+        # -------------------------------------------------------------------------
+        # Model accuracy and timing metrics
+        # -------------------------------------------------------------------------
+        # performance_metrics → how accurate is the model? (accuracy, F1, ROC-AUC)
+        # timing_metrics      → how long did CF generation take per person?
+        y_true, y_pred = predict_model(
+            backend=config.backend,
+            model=self.model,
+            df=model_input_df_numeric,
+            feature_cols=config.feature_cols,
+            target_col=config.target,
+        )
+        performance_metrics = PerformanceMetrics.compute_classification_metrics(
+            y_true, y_pred
+        )
+        timing_metrics = PerformanceMetrics.compute_timing_metrics(cf_times)
+
+        # -------------------------------------------------------------------------
+        # Export
+        # -------------------------------------------------------------------------
+        logger.info("Exporting results...")
+
+        model_info = extract_model_info(self.model, config)
+
+        output_dir = create_output_directory(
+            output_base=self.output_dir,
+            model_type=model_info["model_type"],
+            explainer_method=self.explainer_profile.method,
+            threshold=self.explainer_profile.stopping_threshold,
+            use_permitted_range=self.use_permitted_range,
+            run_id=self.run_id,
+        )
+        logger.info(f"Output directory: {output_dir}")
+
+        # Save annotated batch CSV
+        annotated_batch.to_csv(output_dir / "annotated.csv", index=False)
+
+        # Export configuration with timing
+        suffix = f"{model_info['model_type']}_{self.explainer_profile.method}.txt"
+        ConfigExporter.export(
+            output_path=output_dir / f"config_{suffix}",
+            system_config=config,
+            explainer_profile=self.explainer_profile,
+            timing_metrics=timing_metrics,
+        )
+
+        ModelInfoExporter.export_json(
+            output_dir / "model_info.json",
+            model_info,
+        )
+
+        ModelInfoExporter.export(
+            output_dir / "model_info.txt",
+            model_info,
+            performance_metrics,
+        )
+
+    # -------------------------------------------------------------------------
+    # Setup helpers
+    # -------------------------------------------------------------------------
+
+    def _load_model(self):
+        """Load model and scaler from disk. Returns (model, is_keras, scaler).
+        The model was pre-trained and saved — no training happens here.
+        joblib is used for sklearn models (RF, XGBoost). Keras for neural nets.
+        """
+        if self.config.backend == "TF2":
+            import tensorflow as tf
+
+            model = tf.keras.models.load_model(self.model_path)
+            is_keras = True
+            scaler = joblib.load(self.scaler_path)
+        else:
+            model = joblib.load(self.model_path)
+            is_keras = False
+            scaler = None
+        return model, is_keras, scaler
+
+    # -------------------------------------------------------------------------
+    # Logger debug helpers
+    # -------------------------------------------------------------------------
+
+    def _log_model_input_dtypes(self, model_input_df_numeric, feature_cols):
+        logger.debug("model_input_df dtypes (for SanitizedModel):")
+        for col in feature_cols:
+            if col in model_input_df_numeric.columns:
+                logger.debug(f"  {col}: {model_input_df_numeric[col].dtype}")
+
+    def _log_dtype_consistency(self, df_traning_for_dice, query_df):
+        logger.debug("DiCE dtype consistency check:")
+        logger.debug(
+            f"Training data dtype (etfruit): {df_traning_for_dice['etfruit'].dtype}"
+        )
+        logger.debug(f"Query data dtype (etfruit): {query_df['etfruit'].dtype}")
+        logger.debug(
+            "Training unique values (etfruit): "
+            f"{sorted(df_traning_for_dice['etfruit'].unique())}"
+        )
+        logger.debug(
+            f"Query unique values (etfruit): {sorted(query_df['etfruit'].unique())}"
+        )
+
+    def _log_query_and_training_coverage(self, idx, row, config, df_traning_for_dice):
         logger.debug(f"Query instance {idx}:")
         logger.debug("Query values:")
         for feat in config.ordinal_features:
@@ -231,146 +407,18 @@ def run_pipeline(cfg):
                 logger.debug(
                     f"  {feat}: {row[feat]} (dtype: {type(row[feat]).__name__})"
                 )
-
         logger.debug("Training coverage:")
         for feat in config.ordinal_features:
             if feat in df_traning_for_dice.columns:
                 unique_vals = sorted(df_traning_for_dice[feat].unique())
                 logger.debug(f"  {feat}: {unique_vals}")
 
-        # Time CF generation for this instance
-        start_time = time.perf_counter()
-        cf = explainer.generate_counterfactuals(
-            query_instances=single_query,
-            **explainer_profile.to_cf_params_for_row(row),
-        )
-        end_time = time.perf_counter()
 
-        cf_results.append(cf)
-        cf_times.append(end_time - start_time)
+# --------------------------------------------------------------------------
+# Entry point called by cli.py
+# --------------------------------------------------------------------------
 
-    # ---------------------------------------------------------------------------
-    # Risk evaluation
-    # ---------------------------------------------------------------------------
-    # DiCE returns counterfactuals but does NOT compute the actual risk percentage.
-    # We pass each CF back through the model to get:
-    #   risk_before          → original person's risk (e.g. 6.3%)
-    #   target_risk          → goal (set to half of risk_before by default)
-    #   predicted_risk_after → risk after applying the CF (e.g. 2.0%)
-    #   valid                → True if predicted_risk_after is below target_risk
-    #
-    # SanitizedModel wraps the real model and handles the string→number conversion
-    # needed because DiCE outputs string values for ordinal features.
-    if cfg["backend"] == "sklearn":
-        model_for_risk = SanitizedModel(model, model_input_df_numeric)
-    else:
-        model_for_risk = model
-
-    risk_evaluator = build_risk_evaluator(
-        backend=cfg["backend"],
-        model=model_for_risk,
-        feature_cols=config.feature_cols,
-        target_factor=config.target_factor,
-    )
-
-    # annotate_all → adds risk columns to every CF result
-    all_annotated = annotate_all(risk_evaluator, cf_results, query_df)
-
-    # ----------------------------------------------------------------------
-    # Assemble the final output table
-    # ----------------------------------------------------------------------
-    # build_annotated_batch creates the CSV structure you see in cf_outputs/:
-    #   - one "original" row per person (their actual feature values + risk)
-    #   - one "cf_1", "cf_2", ... row per counterfactual (only changed features shown)
-    # Empty cells in CF rows mean that feature was NOT changed by this CF.
-    annotated_batch = build_annotated_batch(
-        query_instances=query_df,
-        all_annotated=all_annotated,
-        target=cfg["target"],
-    )
-
-    # Add CF generation time per instance to annotated batch
-    # Only set timing for 'original' rows (one time per query instance)
-    # Round to 2 decimals for readability
-    time_mapping = {idx: round(time, 2) for idx, time in zip(query_df.index, cf_times)}
-    annotated_batch["cf_gen_time_sec"] = annotated_batch.apply(
-        lambda row: time_mapping.get(row["query_index"])
-        if row["cf_id"] == "original"
-        else None,
-        axis=1,
-    )
-
-    # Inverse scale if needed (neural network models only)
-    # If we scaled the data earlier (step 3), the CF feature values are still
-    # in 0-1 scale. We convert them back to real units (e.g. BMI=0.4 → BMI=24)
-    # so the output CSV is human-readable.
-    if scaler is not None:
-        feature_scaler = FeatureScaler(scaler, config)
-        annotated_batch = feature_scaler.inverse_transform(
-            annotated_batch,
-            feature_cols=config.feature_cols,
-        )
-
-    # -------------------------------------------------------------------------
-    # Model accuracy and timing metrics
-    # -------------------------------------------------------------------------
-    # Compute two sets of metrics to save alongside the CFs:
-    #   performance_metrics → how accurate is the model? (accuracy, F1, etc.)
-    #                         y_true = real labels from test data
-    #                         y_pred = model's predictions on test data
-    #   timing_metrics      → how long did CF generation take?
-    #                         (average, min, max across all persons)
-    predictor = ModelPredictor(backend=config.backend)
-    y_true, y_pred = predictor.predict(
-        model=model,
-        df=model_input_df_numeric,
-        feature_cols=config.feature_cols,
-        target_col=config.target,
-    )
-    performance_metrics = PerformanceMetrics.compute_classification_metrics(
-        y_true, y_pred
-    )
-    timing_metrics = PerformanceMetrics.compute_timing_metrics(cf_times)
-
-    # -------------------------------------------------------------------------
-    # Export
-    # -------------------------------------------------------------------------
-    logger.info("Exporting results...")
-
-    # Extract and model info
-    model_info = extract_model_info(model, config)
-
-    output_dir = create_output_directory(
-        output_base=cfg["output_dir"],
-        model_type=model_info["model_type"],
-        explainer_method=explainer_profile.method,
-        target=cfg["target"],
-    )
-    logger.info(f"Output directory: {output_dir}")
-
-    # Save annotated batch CSV
-    annotated_batch.to_csv(
-        output_dir / f"{explainer_profile.method}_annotated_{cfg['target']}.csv",
-        index=False,
-    )
-
-    # Export configuration with timing
-    suffix = f"{explainer_profile.method}_{config.target}.txt"
-    ConfigExporter.export(
-        output_path=output_dir / f"config_{suffix}",
-        system_config=config,
-        explainer_profile=explainer_profile,
-        timing_metrics=timing_metrics,
-    )
-
-    # export modell info
-    ModelInfoExporter.export_json(
-        output_dir / f"model_{config.target}_info.json",
-        model_info,
-    )
-
-    ModelInfoExporter.export(
-        output_dir / f"model_{config.target}_info.txt",
-        model_info,
-        performance_metrics,
-    )
+def run_pipeline(cfg):
+    """Run the counterfactual pipeline with the given configuration."""
+    runner = BatchRunner(cfg)
+    runner.run()
