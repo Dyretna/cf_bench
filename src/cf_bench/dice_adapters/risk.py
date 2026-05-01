@@ -93,7 +93,7 @@ class BaseRiskEvaluator(ABC):
         other_cols = [
             c
             for c in counterfactuals.columns
-            if c not in first_cols or c not in risk_cols
+            if c not in first_cols and c not in risk_cols
         ]
         return counterfactuals[first_cols + other_cols + risk_cols]
 
