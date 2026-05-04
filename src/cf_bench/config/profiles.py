@@ -279,7 +279,7 @@ class BaseExplainerProfile(ABC):
             return params
 
         # Only build directional bounds for features to vary, so we need to have access to 
-        # active_bounds from where only the according directional bounds will be accessible;
+        # active_bounds where only the according directional bounds will be accessible;
         # otherwise the features locking won't work -> especially for continuous variables like
         # BMI 
         active_bounds = {
