@@ -284,7 +284,7 @@ class BaseExplainerProfile(ABC):
         # BMI 
         active_bounds = {
             feat:bounds 
-            for feat,bounds in DIRECTIONAL_BOUNDS.items
+            for feat,bounds in DIRECTIONAL_BOUNDS.items()
             if feat in self.features_to_vary
         }
 
