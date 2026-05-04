@@ -2,7 +2,6 @@ import logging
 
 import dice_ml
 import pandas as pd
-from dice_ml.explainer_interfaces.dice_tensorflow2 import DiceTensorFlow2
 
 from ..config import SystemConfig
 
@@ -174,6 +173,8 @@ def build_explainer(
     # TF2 BACKEND
     # -----------------------------
     elif config.backend == "TF2":
+        from dice_ml.explainer_interfaces.dice_tensorflow2 import DiceTensorFlow2
+
         dice_model = dice_ml.Model(
             model=predictor_model,
             backend="TF2",

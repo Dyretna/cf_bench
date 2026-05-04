@@ -278,9 +278,18 @@ class BaseExplainerProfile(ABC):
             params.pop("permitted_range", None)
             return params
 
-        # Build directional ranges (returns strings for ordinals)
+        # Only build directional bounds for features to vary, so we need to have access to 
+        # active_bounds from where only the according directional bounds will be accessible;
+        # otherwise the features locking won't work -> especially for continuous variables like
+        # BMI 
+        active_bounds = {
+            feat:bounds 
+            for feat,bounds in DIRECTIONAL_BOUNDS.items
+            if feat in self.features_to_vary
+        }
+
         directional = build_directional_ranges(
-            row, DIRECTIONAL_BOUNDS, self.ordinal_allowed_values
+            row, active_bounds, self.ordinal_allowed_values
         )
 
         # Merge with any static permitted_range
