@@ -34,14 +34,7 @@ class SKLearnModelLoader(LoaderTemplate):
     SUPPORTED_TYPES = [".pkl", ".joblib"]
 
     def load(self, path):
-        """Load sklearn-compatible model (RandomForest, XGBoost, etc.).
-
-        Args:
-            path: Path to model file (.pkl or .joblib)
-
-        Returns:
-            dict: Contains 'model' and 'is_keras' (False)
-        """
+        """Load sklearn-compatible model (RandomForest, XGBoost, etc.)."""
         try:
             file_path = self._validate_path(path)
             self._validate_type(file_path, self.SUPPORTED_TYPES)
@@ -59,15 +52,7 @@ class KerasModelLoader(LoaderTemplate):
     SUPPORTED_TYPES = [".keras", ".h5"]
 
     def load(self, path, scaler_path=None):
-        """Load Keras/TensorFlow model and optional scaler.
-
-        Args:
-            path: Path to Keras model file (.keras or .h5)
-            scaler_path: Optional path to scaler file (.pkl or .joblib)
-
-        Returns:
-            dict: Contains 'model', 'is_keras' (True), and optional 'scaler'
-        """
+        """Load Keras/TensorFlow model and optional scaler."""
         try:
             file_path = self._validate_path(path)
             self._validate_type(file_path, self.SUPPORTED_TYPES)

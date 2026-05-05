@@ -1,0 +1,48 @@
+=== MODEL INFO ===
+
+Model Type: RandomForest
+Model Class: RandomForestClassifier
+Model Module: sklearn.ensemble._forest
+
+Parameters:
+  bootstrap: True
+  ccp_alpha: 0.0
+  class_weight: None
+  criterion: gini
+  max_depth: None
+  max_features: sqrt
+  max_leaf_nodes: None
+  max_samples: None
+  min_impurity_decrease: 0.0
+  min_samples_leaf: 1
+  min_samples_split: 2
+  min_weight_fraction_leaf: 0.0
+  monotonic_cst: None
+  n_estimators: 300
+  n_jobs: None
+  oob_score: False
+  random_state: 42
+  verbose: 0
+  warm_start: False
+
+Feature Importances:
+  bmi: 0.4669
+  dosprt: 0.1290
+  alcfreq: 0.1032
+  etfruit: 0.0847
+  eatveg: 0.0788
+  cgtsmok: 0.0741
+  slprl: 0.0521
+  paccnois: 0.0111
+
+=== PERFORMANCE ===
+              precision    recall  f1-score   support
+
+           0       0.86      0.86      0.86         7
+           1       0.50      0.50      0.50         2
+
+    accuracy                           0.78         9
+   macro avg       0.68      0.68      0.68         9
+weighted avg       0.78      0.78      0.78         9
+
+ROC-AUC: 0.6786

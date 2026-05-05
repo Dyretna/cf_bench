@@ -7,7 +7,7 @@ attrs==23.2.0
 blis==0.7.11
 catalogue==2.0.10
 certifi==2026.1.4
--e git+ssh://git@github.com/Dyretna/cf_bench.git@4174e335db5256f9cd3d6ce404214bd954bd3ae2#egg=cf_bench
+-e git+ssh://git@github.com/Dyretna/cf_bench.git@3b0d074ee55a40224a3ba91ed1c55f528327a06b#egg=cf_bench
 cfgv==3.5.0
 charset-normalizer==3.4.4
 click==8.3.1
@@ -38,6 +38,7 @@ huggingface-hub==0.36.0
 identify==2.6.18
 idna==3.11
 ImageIO==2.37.2
+imbalanced-learn==0.14.1
 ipykernel==7.2.0
 ipython==9.10.0
 ipython_pygments_lexers==1.1.1
@@ -108,6 +109,7 @@ seaborn==0.13.2
 shap==0.43.0
 shellingham==1.5.4
 six==1.17.0
+sklearn-compat==0.1.5
 slicer==0.0.7
 smart_open==7.5.0
 spacy==3.7.5

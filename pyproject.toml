@@ -22,6 +22,7 @@ classifiers = [
 dependencies = [
     "dice_ml==0.12",
     "gower==0.1.2",
+    "imbalanced-learn==0.14.1",
     "numpy==1.26",
     "pandas>=2.3",
     "python-dotenv>=1.0",

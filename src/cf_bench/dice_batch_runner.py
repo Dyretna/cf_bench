@@ -25,7 +25,7 @@
 #   6. Loop over each person → generate counterfactuals → record time
 #   7. Evaluate the risk before/after each CF
 #   8. Assemble results into a table
-#   9. Compute model accuracy and timing metrics
+#   9. Compute Gower distance, model accuracy and timing metrics
 #  10. Save everything to cf_outputs/
 #
 # OUTPUT:
