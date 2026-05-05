@@ -21,10 +21,11 @@ classifiers = [
 ]
 dependencies = [
     "dice_ml==0.12",
+    "gower==0.1.2",
     "numpy==1.26",
     "pandas>=2.3",
-    "scikit-learn==1.8",
     "python-dotenv>=1.0",
+    "scikit-learn==1.8",
     "tensorflow_cpu==2.21.0",
     "xgboost==3.1.2"
 ]

@@ -40,7 +40,6 @@ import logging
 import time
 import warnings
 
-import joblib
 import pandas as pd
 
 # Local imports
@@ -54,6 +53,8 @@ from .config import (
 from .data.loaders import load_dice_compatible_data
 from .data.transformers import FeatureScaler, QueryInstancePreparer
 from .dice_adapters import SanitizedModel, build_explainer, build_risk_evaluator
+from .logger import LoggingHelper
+from .model_loader import load_model_by_backend
 from .results.exporters import (
     ConfigExporter,
     ModelInfoExporter,
@@ -126,15 +127,20 @@ class BatchRunner:
 
         # Build the filtered features_to_vary list (all features except locked ones)
         features_to_vary = [
-            f for f in self.config.features_to_vary
-            if f not in self.features_to_lock
+            f for f in self.config.features_to_vary if f not in self.features_to_lock
         ]
         if self.features_to_lock:
-            logger.info(f"Locked features (DiCE will not change): {self.features_to_lock}")
+            logger.info(
+                f"Locked features (DiCE will not change): {self.features_to_lock}"
+            )
             logger.info(f"Features DiCE can vary: {features_to_vary}")
 
         # Load model from disk (no training happens here — model was pre-trained)
-        self.model, self.is_keras, self.scaler = self._load_model()
+        self.model, self.is_keras, self.scaler = load_model_by_backend(
+            backend=self.backend,
+            model_path=self.model_path,
+            scaler_path=self.scaler_path,
+        )
 
         # Create explainer profile
         # (DiCE Search Algorithm: "random" | "genetic" | "gradient", + params)
@@ -147,6 +153,10 @@ class BatchRunner:
             use_permitted_range=self.use_permitted_range,
             posthoc_sparsity_param=self.posthoc_sparsity_param,
         )
+
+    # ------------------------------------------------------------------------------
+    # The Runner
+    # ------------------------------------------------------------------------------
 
     def run(self):
         """Main runner: orchestrates data loading, CF generation, annotation and export."""
@@ -196,8 +206,10 @@ class BatchRunner:
             if col in model_input_df_numeric.columns:
                 model_input_df_numeric[col] = pd.to_numeric(model_input_df_numeric[col])
 
-        self._log_model_input_dtypes(model_input_df_numeric, config.feature_cols)
-        self._log_dtype_consistency(df_traning_for_dice, query_df)
+        LoggingHelper.log_model_input_dtypes(
+            model_input_df_numeric, config.feature_cols
+        )
+        LoggingHelper.log_dtype_consistency(df_traning_for_dice, query_df)
 
         # --------------------------------------------------------------------------
         # Build DiCE explainer
@@ -226,7 +238,9 @@ class BatchRunner:
 
         for idx, row in query_df.iterrows():
             single_query = row.to_frame().T
-            self._log_query_and_training_coverage(idx, row, config, df_traning_for_dice)
+            LoggingHelper.log_query_and_training_coverage(
+                idx, row, config, df_traning_for_dice
+            )
             # Time CF generation for this instance
             start_time = time.perf_counter()
             cf = explainer.generate_counterfactuals(
@@ -236,6 +250,7 @@ class BatchRunner:
             end_time = time.perf_counter()
             cf_results.append(cf)
             cf_times.append(end_time - start_time)
+            # --- gower distance here?? ---
 
         # ---------------------------------------------------------------------------
         # Risk evaluation
@@ -298,8 +313,14 @@ class BatchRunner:
             )
 
         # -------------------------------------------------------------------------
-        # Model accuracy and timing metrics
+        # Gower distance, model accuracy and timing metrics
         # -------------------------------------------------------------------------
+        # Add Gower distance column
+        # Measures similarity between original and CF (lower = more similar)
+        annotated_batch = PerformanceMetrics.add_gower_distance_column(
+            annotated_batch=annotated_batch,
+            feature_cols=config.feature_cols,
+        )
         # performance_metrics → how accurate is the model? (accuracy, F1, ROC-AUC)
         # timing_metrics      → how long did CF generation take per person?
         y_true, y_pred = predict_model(
@@ -354,69 +375,11 @@ class BatchRunner:
             performance_metrics,
         )
 
-    # -------------------------------------------------------------------------
-    # Setup helpers
-    # -------------------------------------------------------------------------
-
-    def _load_model(self):
-        """Load model and scaler from disk. Returns (model, is_keras, scaler).
-        The model was pre-trained and saved — no training happens here.
-        joblib is used for sklearn models (RF, XGBoost). Keras for neural nets.
-        """
-        if self.config.backend == "TF2":
-            import tensorflow as tf
-
-            model = tf.keras.models.load_model(self.model_path)
-            is_keras = True
-            scaler = joblib.load(self.scaler_path)
-        else:
-            model = joblib.load(self.model_path)
-            is_keras = False
-            scaler = None
-        return model, is_keras, scaler
-
-    # -------------------------------------------------------------------------
-    # Logger debug helpers
-    # -------------------------------------------------------------------------
-
-    def _log_model_input_dtypes(self, model_input_df_numeric, feature_cols):
-        logger.debug("model_input_df dtypes (for SanitizedModel):")
-        for col in feature_cols:
-            if col in model_input_df_numeric.columns:
-                logger.debug(f"  {col}: {model_input_df_numeric[col].dtype}")
-
-    def _log_dtype_consistency(self, df_traning_for_dice, query_df):
-        logger.debug("DiCE dtype consistency check:")
-        logger.debug(
-            f"Training data dtype (etfruit): {df_traning_for_dice['etfruit'].dtype}"
-        )
-        logger.debug(f"Query data dtype (etfruit): {query_df['etfruit'].dtype}")
-        logger.debug(
-            "Training unique values (etfruit): "
-            f"{sorted(df_traning_for_dice['etfruit'].unique())}"
-        )
-        logger.debug(
-            f"Query unique values (etfruit): {sorted(query_df['etfruit'].unique())}"
-        )
-
-    def _log_query_and_training_coverage(self, idx, row, config, df_traning_for_dice):
-        logger.debug(f"Query instance {idx}:")
-        logger.debug("Query values:")
-        for feat in config.ordinal_features:
-            if feat in row.index:
-                logger.debug(
-                    f"  {feat}: {row[feat]} (dtype: {type(row[feat]).__name__})"
-                )
-        logger.debug("Training coverage:")
-        for feat in config.ordinal_features:
-            if feat in df_traning_for_dice.columns:
-                unique_vals = sorted(df_traning_for_dice[feat].unique())
-                logger.debug(f"  {feat}: {unique_vals}")
-
 
 # --------------------------------------------------------------------------
 # Entry point called by cli.py
 # --------------------------------------------------------------------------
+
 
 def run_pipeline(cfg):
     """Run the counterfactual pipeline with the given configuration."""

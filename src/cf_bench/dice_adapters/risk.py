@@ -81,9 +81,11 @@ class BaseRiskEvaluator(ABC):
         original_prob: float = self.compute_risk_before(query_instances)
         target_risk: float = original_prob * self.target_factor
 
-        counterfactuals["risk_before"] = original_prob
-        counterfactuals["target_risk"] = target_risk
-        counterfactuals["predicted_risk_after"] = self.compute_cf_risks(counterfactuals)
+        counterfactuals["risk_before"] = round(original_prob, 4)
+        counterfactuals["target_risk"] = round(target_risk, 4)
+        counterfactuals["predicted_risk_after"] = np.round(
+            self.compute_cf_risks(counterfactuals), 4
+        )
         counterfactuals["valid"] = (
             counterfactuals["predicted_risk_after"] <= target_risk
         )

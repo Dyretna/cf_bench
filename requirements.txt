@@ -1,5 +1,4 @@
 absl-py==2.4.0
--e git+ssh://git@github.com/Dyretna/ai_counterfactuals_tests@a3a9e6c6428413f39dc770dcceaf0d9ab42bdeec#egg=ai_counterfactuals_tests
 alibi==0.9.6
 annotated-types==0.7.0
 asttokens==3.0.1
@@ -8,6 +7,7 @@ attrs==23.2.0
 blis==0.7.11
 catalogue==2.0.10
 certifi==2026.1.4
+-e git+ssh://git@github.com/Dyretna/cf_bench.git@4174e335db5256f9cd3d6ce404214bd954bd3ae2#egg=cf_bench
 cfgv==3.5.0
 charset-normalizer==3.4.4
 click==8.3.1
@@ -30,6 +30,7 @@ fonttools==4.61.1
 fsspec==2025.12.0
 gast==0.7.0
 google-pasta==0.2.0
+gower==0.1.2
 grpcio==1.80.0
 h5py==3.14.0
 hf-xet==1.2.0
@@ -66,7 +67,8 @@ nest-asyncio==1.6.0
 networkx==3.6.1
 nodeenv==1.10.0
 numba==0.59.1
-numpy==1.26.4
+numpy==1.26.0
+nvidia-nccl-cu12==2.29.7
 opt_einsum==3.4.0
 optree==0.19.0
 packaging==25.0
