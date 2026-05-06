@@ -8,7 +8,7 @@ output_dir: "cf_outputs/SMOTE"
 backend: "sklearn"
 
 # profile, eg. DiCE model
-explainer_profile: "genetic"   # "random" or "genetic"
+explainer_profile: "genetic"
 total_CFs: 10
-stopping_threshold: 0.1
-use_permitted_range: true  # use with genetic
+stopping_threshold: 0.5
+use_permitted_range: true

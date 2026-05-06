@@ -1,9 +1,29 @@
 # Runs on SMOTE...
+- high stopping_threshold = 0.9
+- mid stopping_threshold = 0.5
+- low stopping_threshold = 0.1
 
-- **rf_simple_highthres**: produces good results, one observation fails (cannot find valid)
-- **rf_simple_midthres**:  produces good results, All valid and expected
-- **rf_simple_lowthres**:  [ERROR] No counterfactuals found for any of the query points!
+- base = based on model trained with SMOTE, but without gridsearch parameter tuning
+- gs = based on model trained with SMOTE, with gridsearch parameter tuning
 
-- **rf_SMOTE_gridsearched_highthres**: [ERROR] No counterfactuals found for any of the query points!
-- **rf_SMOTE_gridsearched_midthres**: Produces poor results, 4 invalid.
-- **rf_SMOTE_gridsearched_lowthres**: [ERROR] No counterfactuals found for any of the query points!
+# results overview:
+
+### Random Forest
+- **base_rf_SMOTE_highthres**: produces good results, All valid and expected
+- **base_rf_SMOTE_midthres**:  produces good results, one observation fails (cannot find valid)
+- **base_rf_SMOTE_lowthres**:  [ERROR] No counterfactuals found for any of the query points!
+
+- **gs_rf_SMOTE_highthres**: [ERROR] No counterfactuals found for any of the query points!
+- **gs_rf_SMOTE_midthres**: Produces poor results, 5 invalid.
+- **gs_rf_SMOTE_lowthres**: [ERROR] No counterfactuals found for any of the query points!
+
+
+### XGBooost
+- not done yet... upcoming...
+
+for more info, see notebooks, spreadsheets, etc...
+
+
+
+# comment
+- highthreshold is best for simple RF, then successively worse...
