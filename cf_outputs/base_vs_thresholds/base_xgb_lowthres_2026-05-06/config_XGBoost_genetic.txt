@@ -13,7 +13,7 @@ features_to_vary       : ['etfruit', 'eatveg', 'cgtsmok', 'alcfreq', 'slprl', 'p
 
 === GeneticExplainerProfile ===
 total_CFs              : 10
-stopping_threshold     : 0.5
+stopping_threshold     : 0.1
 ordinal_allowed_values : {'etfruit': [1, 2, 3, 4, 5, 6, 7], 'eatveg': [1, 2, 3, 4, 5, 6, 7], 'cgtsmok': [1, 2, 3, 4, 5, 6], 'alcfreq': [1, 2, 3, 4, 5, 6, 7], 'slprl': [1, 2, 3, 4], 'paccnois': [0, 1], 'dosprt': [0, 1, 2, 3, 4, 5, 6, 7]}
 features_to_vary       : ['etfruit', 'eatveg', 'cgtsmok', 'alcfreq', 'slprl', 'paccnois', 'bmi', 'dosprt']
 permitted_range        : None
@@ -26,8 +26,8 @@ verbose                : False
 
 === TIMING INFORMATION ===
 
-Total CF generation time: 22.78s
-Average time per instance: 2.53s
-Min time: 2.34s
-Max time: 2.85s
+Total CF generation time: 9.88s
+Average time per instance: 1.10s
+Min time: 0.94s
+Max time: 1.27s
 Number of instances: 9

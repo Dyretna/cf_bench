@@ -55,6 +55,7 @@ from .data.transformers import FeatureScaler, QueryInstancePreparer
 from .dice_adapters import SanitizedModel, build_explainer, build_risk_evaluator
 from .logger import LoggingHelper
 from .model_loader import load_model_by_backend
+from .results.assembler import assemble_annotated_results
 from .results.exporters import (
     ConfigExporter,
     ModelInfoExporter,
@@ -63,7 +64,6 @@ from .results.exporters import (
 from .results.metrics import PerformanceMetrics
 from .results.model_info_extractors import extract_model_info
 from .results.predictions import predict_model
-from .utils import build_annotated_batch
 
 logger = logging.getLogger(__name__)
 
@@ -154,9 +154,9 @@ class BatchRunner:
             posthoc_sparsity_param=self.posthoc_sparsity_param,
         )
 
-    # ------------------------------------------------------------------------------
+    # ==========================================================================
     # The Runner
-    # ------------------------------------------------------------------------------
+    # ==========================================================================
 
     def run(self):
         """Main runner: orchestrates data loading, CF generation, annotation and export."""
@@ -279,28 +279,18 @@ class BatchRunner:
         all_annotated = risk_evaluator.annotate_all(cf_results, query_df)
 
         # ----------------------------------------------------------------------
-        # Assemble the final output table
+        # Assemble the final output table with all metrics
         # ----------------------------------------------------------------------
-        # build_annotated_batch creates the CSV structure:
+        # Builds the CSV structure with:
         #   - one "original" row per person (their actual feature values + risk)
         #   - one "cf_1", "cf_2", ... row per counterfactual (only changed features shown)
-        # Empty cells in CF rows mean that feature was NOT changed by this CF.
-        annotated_batch = build_annotated_batch(
-            query_instances=query_df,
+        #   - timing data, Gower distance, nchanged count, and proper column ordering
+        annotated_batch = assemble_annotated_results(
+            query_df=query_df,
             all_annotated=all_annotated,
+            cf_times=cf_times,
             target=config.target,
-        )
-
-        # Add CF generation time per instance to annotated batch
-        # Only set timing for 'original' rows (one time per query instance)
-        time_mapping = {
-            idx: round(time, 2) for idx, time in zip(query_df.index, cf_times)
-        }
-        annotated_batch["cf_gen_time_sec"] = annotated_batch.apply(
-            lambda row: time_mapping.get(row["query_index"])
-            if row["cf_id"] == "original"
-            else None,
-            axis=1,
+            feature_cols=config.feature_cols,
         )
 
         # Inverse scale if needed (neural network models only)
@@ -313,16 +303,10 @@ class BatchRunner:
             )
 
         # -------------------------------------------------------------------------
-        # Gower distance, model accuracy and timing metrics
+        # Model performance and timing metrics
         # -------------------------------------------------------------------------
-        # Add Gower distance column
-        # Measures similarity between original and CF (lower = more similar)
-        annotated_batch = PerformanceMetrics.add_gower_distance_column(
-            annotated_batch=annotated_batch,
-            feature_cols=config.feature_cols,
-        )
-        # performance_metrics → how accurate is the model? (accuracy, F1, ROC-AUC)
-        # timing_metrics      → how long did CF generation take per person?
+
+        # Evaluate model accuracy on the test set (accuracy, F1, ROC-AUC)
         y_true, y_pred = predict_model(
             backend=config.backend,
             model=self.model,
@@ -333,6 +317,8 @@ class BatchRunner:
         performance_metrics = PerformanceMetrics.compute_classification_metrics(
             y_true, y_pred
         )
+
+        # Compute CF generation timing statistics (mean, median, min, max)
         timing_metrics = PerformanceMetrics.compute_timing_metrics(cf_times)
 
         # -------------------------------------------------------------------------
