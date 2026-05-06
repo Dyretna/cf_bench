@@ -34,14 +34,26 @@ def filter_valid_cfs(df: pd.DataFrame) -> pd.DataFrame:
     # Create placeholder rows for queries without valid CFs
     placeholder_rows = []
     for qi in query_indices_without_valid:
-        # Create minimal row with only query_index and valid="False"
+        # Get the original row to extract risk values
+        orig_row = df_xin[df_xin["query_index"] == qi].iloc[0]
+
+        # Create minimal row with query_index, valid, and risk columns
         placeholder = pd.Series(index=df.columns, dtype=object)
         placeholder["query_index"] = qi
         placeholder["cf_id"] = ""
         placeholder["valid"] = "False"
+        placeholder["risk_before"] = orig_row["risk_before"]
+        placeholder["predicted_risk_after"] = orig_row["predicted_risk_after"]
+
         # Fill all other columns with empty string
         for col in placeholder.index:
-            if col not in ["query_index", "cf_id", "valid"]:
+            if col not in [
+                "query_index",
+                "cf_id",
+                "valid",
+                "risk_before",
+                "predicted_risk_after",
+            ]:
                 placeholder[col] = ""
         placeholder_rows.append(placeholder)
 
