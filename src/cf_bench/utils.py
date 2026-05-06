@@ -6,27 +6,50 @@ def filter_valid_cfs(df: pd.DataFrame) -> pd.DataFrame:
     Filter to keep only valid counterfactuals (where valid == True).
 
     Preserves all original instances and only keeps CFs that meet the target risk.
+    For queries with no valid CFs, adds a placeholder row with valid=False.
     This is useful for analysis where you only want to examine successful CFs.
 
     Args:
         df: DataFrame with 'cf_id' and 'valid' columns
 
     Returns:
-        DataFrame with original rows + valid CFs only, sorted by query_index
+        DataFrame with original rows + valid CFs (or False placeholder), sorted by query_index
     """
     df = df.copy()
 
     # Split baseline and CF rows (support both "original" and "xin")
-    df_xin = df[df["cf_id"].isin(["original", "xin"])]
-    df_cf = df[~df["cf_id"].isin(["original", "xin"])]
+    df_xin = df[df["cf_id"].isin(["original", "xin"])].copy()
+    df_cf = df[~df["cf_id"].isin(["original", "xin"])].copy()
 
-    # Keep only valid CFs (handle both boolean and string "True")
-    # Convert to boolean dtype
-    df_cf["valid"] = df_cf["valid"].astype(bool)
-    df_cf_valid = df_cf[df_cf["valid"]].copy()
+    # Keep only valid CFs (handle both boolean True and string "True")
+    # Create a boolean mask that works for both types
+    is_valid = df_cf["valid"].isin([True, "True"])
+    df_cf_valid = df_cf[is_valid].copy()
 
-    # Combine baseline + valid CFs
-    result = pd.concat([df_xin, df_cf_valid], ignore_index=True)
+    # Find query_indices with no valid CFs
+    query_indices_with_valid = set(df_cf_valid["query_index"].unique())
+    all_query_indices = set(df_xin["query_index"].unique())
+    query_indices_without_valid = all_query_indices - query_indices_with_valid
+
+    # Create placeholder rows for queries without valid CFs
+    placeholder_rows = []
+    for qi in query_indices_without_valid:
+        # Create minimal row with only query_index and valid="False"
+        placeholder = pd.Series(index=df.columns, dtype=object)
+        placeholder["query_index"] = qi
+        placeholder["cf_id"] = ""
+        placeholder["valid"] = "False"
+        # Fill all other columns with empty string
+        for col in placeholder.index:
+            if col not in ["query_index", "cf_id", "valid"]:
+                placeholder[col] = ""
+        placeholder_rows.append(placeholder)
+
+    # Combine all parts
+    result_parts = [df_xin, df_cf_valid]
+    if placeholder_rows:
+        result_parts.append(pd.DataFrame(placeholder_rows))
+    result = pd.concat(result_parts, ignore_index=True)
 
     # Ensure original appears before CFs for each query_index
     result["_is_original"] = result["cf_id"].isin(["original", "xin"]).astype(int)
@@ -65,21 +88,20 @@ def select_one_cf_per_query(
 
     def select_best_cf(group):
         """Select one CF per query, preferring those without violations."""
-        # Convert valid column to boolean dtype
-        group = group.copy()
-        group["valid"] = group["valid"].astype(bool)
+        # Create boolean mask that works for both boolean True and string "True"
+        is_valid = group["valid"].isin([True, "True"])
 
         # Check if we have the "Expected" column for violation detection
         has_expected_col = "Expected" in group.columns
 
         # First try: valid AND no violations (if prefer_no_violations and column exists)
         if prefer_no_violations and has_expected_col:
-            good_cfs = group[group["valid"] & (group["Expected"] == "")]
+            good_cfs = group[is_valid & (group["Expected"] == "")]
             if len(good_cfs) > 0:
                 return good_cfs.sample(n=1, random_state=random_state)
 
         # Fallback: any valid CF
-        valid_cfs = group[group["valid"]]
+        valid_cfs = group[is_valid]
         if len(valid_cfs) > 0:
             return valid_cfs.sample(n=1, random_state=random_state)
 
