@@ -25,8 +25,9 @@
 #   6. Loop over each person → generate counterfactuals → record time
 #   7. Evaluate the risk before/after each CF
 #   8. Assemble results into a table
-#   9. Compute Gower distance, model accuracy and timing metrics
-#  10. Save everything to cf_outputs/
+#   9. Inverse Scale the data (if needed, for Neural Network)
+#  10. Compute model accuracy and timing metrics
+#  11. Save everything to cf_outputs/
 #
 # OUTPUT:
 #   A folder in cf_outputs/ containing:
@@ -127,8 +128,9 @@ class BatchRunner:
 
         # Build the filtered features_to_vary list (all features except locked ones)
         features_to_vary = [
-            f for f in self.config.features_to_vary if f not in self.features_to_lock
+            f for f in self.config.feature_cols if f not in self.features_to_lock
         ]
+
         if self.features_to_lock:
             logger.info(
                 f"Locked features (DiCE will not change): {self.features_to_lock}"

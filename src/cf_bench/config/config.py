@@ -136,12 +136,6 @@ class SystemConfig:
 
     target_factor: float = 0.5  # multiplier for RiskEvaluator
 
-    def __post_init__(self):
-        self.features_to_vary = [
-            c
-            for c in self.feature_cols  # if c not in self.immutable_cols
-        ]
-
     def __str__(self):
         header = "=== System Config ==="
         lines = [f"{key:23}: {value}" for key, value in self.__dict__.items()]
