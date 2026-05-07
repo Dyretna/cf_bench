@@ -1,7 +1,7 @@
 # paths
 train_path: "data/full.csv"
 test_path: "data/cfcheck.csv"
-model_path: "models/rf_SMOTE_simple.pkl"
+model_path: "models/xgb_SMOTE_simple.pkl"
 output_dir: "cf_outputs/SMOTE/base_predictors/"
 
 # system config
@@ -10,5 +10,5 @@ backend: "sklearn"
 # profile, eg. DiCE model
 explainer_profile: "genetic"
 total_CFs: 10
-stopping_threshold: 0.5
+stopping_threshold: 0.9
 use_permitted_range: true

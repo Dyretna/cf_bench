@@ -1,8 +1,8 @@
 # paths
 train_path: "data/full.csv"
 test_path: "data/cfcheck.csv"
-model_path: "models/rf_SMOTE_simple.pkl"
-output_dir: "cf_outputs/SMOTE/base_predictors/"
+model_path: "models/xgb_SMOTE_gridsearched.pkl"
+output_dir: "cf_outputs/SMOTE/gridsearched_predictors/"
 
 # system config
 backend: "sklearn"

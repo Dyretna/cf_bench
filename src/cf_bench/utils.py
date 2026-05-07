@@ -26,41 +26,21 @@ def filter_valid_cfs(df: pd.DataFrame) -> pd.DataFrame:
     is_valid = df_cf["valid"].isin([True, "True"])
     df_cf_valid = df_cf[is_valid].copy()
 
-    # Find query_indices with no valid CFs
+    # Find query_indices with no valid CFs and get first invalid CF instead
     query_indices_with_valid = set(df_cf_valid["query_index"].unique())
-    all_query_indices = set(df_xin["query_index"].unique())
+    all_query_indices = set(df_cf["query_index"].unique())
     query_indices_without_valid = all_query_indices - query_indices_with_valid
 
-    # Create placeholder rows for queries without valid CFs
-    placeholder_rows = []
+    # For queries without valid CFs, take the first invalid CF
+    first_invalid_cfs = []
     for qi in query_indices_without_valid:
-        # Get the original row to extract risk values
-        orig_row = df_xin[df_xin["query_index"] == qi].iloc[0]
-
-        # Create minimal row with query_index, valid, and risk columns
-        placeholder = pd.Series(index=df.columns, dtype=object)
-        placeholder["query_index"] = qi
-        placeholder["cf_id"] = ""
-        placeholder["valid"] = "False"
-        placeholder["risk_before"] = orig_row["risk_before"]
-        placeholder["predicted_risk_after"] = orig_row["predicted_risk_after"]
-
-        # Fill all other columns with empty string
-        for col in placeholder.index:
-            if col not in [
-                "query_index",
-                "cf_id",
-                "valid",
-                "risk_before",
-                "predicted_risk_after",
-            ]:
-                placeholder[col] = ""
-        placeholder_rows.append(placeholder)
+        first_invalid = df_cf[df_cf["query_index"] == qi].iloc[0:1]
+        first_invalid_cfs.append(first_invalid)
 
     # Combine all parts
     result_parts = [df_xin, df_cf_valid]
-    if placeholder_rows:
-        result_parts.append(pd.DataFrame(placeholder_rows))
+    if first_invalid_cfs:
+        result_parts.append(pd.concat(first_invalid_cfs, ignore_index=True))
     result = pd.concat(result_parts, ignore_index=True)
 
     # Ensure original appears before CFs for each query_index

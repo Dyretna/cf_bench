@@ -333,9 +333,7 @@ class BatchRunner:
         output_dir = create_output_directory(
             output_base=self.output_dir,
             model_type=model_info["model_type"],
-            explainer_method=self.explainer_profile.method,
             threshold=self.explainer_profile.stopping_threshold,
-            use_permitted_range=self.use_permitted_range,
             run_id=self.run_id,
         )
         logger.info(f"Output directory: {output_dir}")
