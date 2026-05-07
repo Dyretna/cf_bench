@@ -1,0 +1,69 @@
+=== MODEL INFO ===
+
+Model Type: XGBoost
+Model Class: XGBClassifier
+Model Module: xgboost.sklearn
+
+Parameters:
+  objective: binary:logistic
+  base_score: None
+  booster: None
+  callbacks: None
+  colsample_bylevel: None
+  colsample_bynode: None
+  colsample_bytree: 0.95
+  device: None
+  early_stopping_rounds: None
+  enable_categorical: False
+  eval_metric: logloss
+  feature_types: None
+  feature_weights: None
+  gamma: 1.04
+  grow_policy: None
+  importance_type: None
+  interaction_constraints: None
+  learning_rate: 0.25
+  max_bin: None
+  max_cat_threshold: None
+  max_cat_to_onehot: None
+  max_delta_step: None
+  max_depth: 11
+  max_leaves: None
+  min_child_weight: 9
+  missing: nan
+  monotone_constraints: None
+  multi_strategy: None
+  n_estimators: 1100
+  n_jobs: -1
+  num_parallel_tree: None
+  random_state: 42
+  reg_alpha: 0.2
+  reg_lambda: 1.35
+  sampling_method: None
+  scale_pos_weight: None
+  subsample: 0.35
+  tree_method: None
+  validate_parameters: None
+  verbosity: None
+
+Feature Importances:
+  paccnois: 0.1343
+  bmi: 0.1313
+  dosprt: 0.1254
+  slprl: 0.1251
+  cgtsmok: 0.1222
+  etfruit: 0.1214
+  alcfreq: 0.1205
+  eatveg: 0.1198
+
+=== PERFORMANCE ===
+              precision    recall  f1-score   support
+
+           0       0.78      1.00      0.88         7
+           1       0.00      0.00      0.00         2
+
+    accuracy                           0.78         9
+   macro avg       0.39      0.50      0.44         9
+weighted avg       0.60      0.78      0.68         9
+
+ROC-AUC: 0.5000
