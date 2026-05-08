@@ -1,0 +1,23 @@
+# Noise robustness test: XGBoost optimized (best model) with noisy BMI input
+# Run add_noise.py first to generate data/cfcheck_noisy.csv
+#
+# This tests whether DiCE still finds valid counterfactuals when BMI
+# has small Gaussian noise (sigma=1.0 BMI unit) applied at input.
+# Compare results to xgb_optimized/xgboost_midthres.yaml for reference.
+
+# paths
+train_path: "data/full.csv"
+test_path: "data/cfcheck_noisy.csv"
+# Switch to xgb_optimized.pkl when Jesper shares it
+model_path: "models/xgboost_HL.pkl"
+output_dir: "cf_outputs/noise_tests/xgb_baseline"
+
+# system config
+backend: "sklearn"
+
+# profile
+explainer_profile: "genetic"
+total_CFs: 10
+stopping_threshold: 0.5
+use_permitted_range: true
+run_id: "noise_sigma1"

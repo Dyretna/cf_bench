@@ -78,8 +78,25 @@ class PerformanceMetrics:
         # Make a copy to avoid mutating the original
         result = annotated_batch.copy()
 
-        # Initialize gower_distance column
-        result["gower_distance"] = ""
+        # Build distances in a plain Python dict first, then assign once.
+        # This avoids Pandas StringDtype rejecting float assignments on a column
+        # that was initialized with "".
+        gower_distances = {}  # row_index -> float distance or "" for originals
+
+        # Default to "" for every row (original rows keep this value)
+        for idx in result.index:
+            gower_distances[idx] = ""
+
+        def normalize_for_gower(df):
+            """Cast to numpy-compatible dtypes. Gower cannot handle pd.StringDtype."""
+            out = df.copy()
+            for c in out.columns:
+                numeric = pd.to_numeric(out[c], errors="coerce")
+                if numeric.notna().all():
+                    out[c] = numeric
+                else:
+                    out[c] = out[c].astype(object)
+            return out
 
         for query_idx in result[query_index_col].unique():
             # Get all rows for this person
@@ -98,14 +115,28 @@ class PerformanceMetrics:
                 continue
 
             cf_rows = person_rows[cf_mask]
-            cf_features = cf_rows[feature_cols]
+            cf_features = cf_rows[feature_cols].copy()
+
+            # Fill empty strings with original values before distance calculation.
+            # Empty strings represent unchanged features (masked for CSV readability),
+            # but Gower must see the actual values to compute a meaningful distance.
+            for col in feature_cols:
+                empty_mask = cf_features[col] == ""
+                if empty_mask.any():
+                    original_val = original_row[col].iloc[0]
+                    cf_features.loc[empty_mask, col] = original_val
+
+            original_row = normalize_for_gower(original_row)
+            cf_features = normalize_for_gower(cf_features)
 
             # Compute Gower distances
             # gower_matrix returns [original] x [cf1, cf2, ...] → take first row [0]
             distances = gower.gower_matrix(original_row, cf_features)[0]
 
-            # Assign distances to CF rows
             for idx, dist in zip(cf_rows.index, distances):
-                result.at[idx, "gower_distance"] = round(float(dist), 4)
+                gower_distances[idx] = round(float(dist), 4)
+
+        # Assign as object-dtype Series to avoid StringDtype rejection of floats
+        result["gower_distance"] = pd.Series(gower_distances, dtype=object)
 
         return result
