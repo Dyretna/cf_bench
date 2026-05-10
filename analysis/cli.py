@@ -103,7 +103,7 @@ Examples:
     for csv_path in sorted(csv_files):
         try:
             summary = summarize_experiment(
-                csv_path, include_constraints=args.include_config
+                csv_path, base_path=base_path, include_constraints=args.include_config
             )
             summaries.append(summary)
         except Exception as e:

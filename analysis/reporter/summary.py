@@ -80,13 +80,14 @@ class ExperimentSummary:
 
 
 def summarize_experiment(
-    csv_path: Path, include_constraints: bool = False
+    csv_path: Path, base_path: Path = None, include_constraints: bool = False
 ) -> ExperimentSummary:
     """
     Load one experiment and compute all metrics.
 
     Args:
         csv_path: Path to annotated.csv file
+        base_path: Base path (cf_outputs) for computing relative paths
         include_constraints: Whether to include sparsity and locking columns
 
     Returns:
@@ -96,6 +97,18 @@ def summarize_experiment(
     df = pd.read_csv(csv_path)
     experiment_dir = csv_path.parent
     experiment_name = experiment_dir.name
+
+    # Compute relative path from base_path (cf_outputs directory)
+    if base_path:
+        try:
+            # Get path relative to cf_outputs (exclude the annotated.csv filename)
+            rel_path = experiment_dir.relative_to(base_path)
+            path_str = str(rel_path)
+        except ValueError:
+            # Fallback if path is not relative
+            path_str = str(experiment_dir)
+    else:
+        path_str = str(experiment_dir)
 
     # 2. Extract config using ConfigParser
     config_path = find_config_file(experiment_dir)
@@ -182,7 +195,7 @@ def summarize_experiment(
         top_features=top_features,
         sparsity_param=sparsity_param,
         locked_features=locked_features,
-        csv_path=str(csv_path),
+        csv_path=path_str,
     )
 
 
