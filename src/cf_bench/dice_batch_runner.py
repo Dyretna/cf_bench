@@ -166,10 +166,10 @@ class BatchRunner:
         logger.info("Starting counterfactual pipeline")
         logger.info(f"Predictor model: {type(self.model).__name__}")
         logger.info(f"Explainer profile: {self.explainer_profile_name}")
+        logger.info(f"Locked features: {self.features_to_lock}")
+        logger.info(f"Features to vary: {self.explainer_profile.features_to_vary}")
         logger.info(f"stopping threshold: {self.stopping_threshold}")
         logger.info(f"Sparsity param: {self.posthoc_sparsity_param}")
-        if self.features_to_lock:
-            logger.info(f"Locked features: {self.features_to_lock}")
 
         config = self.config
 
