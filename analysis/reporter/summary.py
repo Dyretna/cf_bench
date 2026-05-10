@@ -28,6 +28,12 @@ FEATURE_COLUMNS = [
     "dosprt",
 ]
 
+# Directional constraints for actionability check
+# Features that should increase for better health (higher is better)
+SHOULD_INCREASE = ["cgtsmok", "alcfreq", "dosprt"]
+# Features that should decrease for better health (lower is better)
+SHOULD_DECREASE = ["bmi", "etfruit", "eatveg", "slprl", "paccnois"]
+
 
 @dataclass
 class ExperimentSummary:
@@ -52,6 +58,7 @@ class ExperimentSummary:
     # Validity metrics
     validity_pct: float
     solved_pct: float
+    actionable_pct: Optional[float]
 
     # Feature change metrics
     avg_nchanged: Optional[float]
@@ -135,6 +142,9 @@ def summarize_experiment(
     )
     solved_pct = (solved_count / n_patients * 100) if n_patients > 0 else 0.0
 
+    # Actionability metric (directional constraints)
+    actionable_pct = _compute_actionable_pct(df, original_rows, cf_rows)
+
     # Feature change metrics
     avg_nchanged = _compute_avg_nchanged(valid_cf_rows)
     avg_nchanged_all = _compute_avg_nchanged(cf_rows)
@@ -183,6 +193,7 @@ def summarize_experiment(
         valid_cfs=valid_cfs,
         validity_pct=validity_pct,
         solved_pct=solved_pct,
+        actionable_pct=actionable_pct,
         avg_nchanged=avg_nchanged,
         avg_nchanged_all=avg_nchanged_all,
         avg_gower_valid=avg_gower_valid,
@@ -280,6 +291,85 @@ def _compute_risk_reduction(
     return round(sum(reductions) / len(reductions), 1)
 
 
+def _compute_actionable_pct(
+    df: pd.DataFrame, original_rows: pd.DataFrame, cf_rows: pd.DataFrame
+) -> Optional[float]:
+    """
+    Compute percentage of CFs that respect directional constraints (actionable).
+
+    Actionable CFs are those that:
+    - Increase features in SHOULD_INCREASE (cgtsmok, alcfreq, dosprt) OR keep them unchanged
+    - Decrease features in SHOULD_DECREASE (bmi, etfruit, eatveg, slprl, paccnois) OR keep them unchanged
+
+    This measures feasibility/actionability - whether the CF suggests realistic changes
+    that align with improving health outcomes.
+    """
+    if len(cf_rows) == 0:
+        return None
+
+    actionable_count = 0
+    total_count = 0
+
+    for _, cf_row in cf_rows.iterrows():
+        query_idx = cf_row["query_index"]
+
+        # Get corresponding baseline (original) row
+        baseline_rows = df[
+            (df["query_index"] == query_idx) & (df["cf_id"] == "original")
+        ]
+        if len(baseline_rows) == 0:
+            continue
+
+        baseline = baseline_rows.iloc[0]
+        is_actionable = True
+
+        # Check features that should increase
+        for feat in SHOULD_INCREASE:
+            # Check if feature was changed (not empty string in CF)
+            cf_val_str = cf_row.get(feat, "")
+            if cf_val_str != "" and str(cf_val_str).strip() != "":
+                # Feature was changed - check direction
+                try:
+                    baseline_val = float(baseline[feat])
+                    cf_val = float(cf_val_str)
+
+                    # Should increase but decreased - violation!
+                    if cf_val < baseline_val:
+                        is_actionable = False
+                        break
+                except (ValueError, TypeError):
+                    # Skip if conversion fails
+                    continue
+
+        # Check features that should decrease
+        if is_actionable:
+            for feat in SHOULD_DECREASE:
+                # Check if feature was changed (not empty string in CF)
+                cf_val_str = cf_row.get(feat, "")
+                if cf_val_str != "" and str(cf_val_str).strip() != "":
+                    # Feature was changed - check direction
+                    try:
+                        baseline_val = float(baseline[feat])
+                        cf_val = float(cf_val_str)
+
+                        # Should decrease but increased - violation!
+                        if cf_val > baseline_val:
+                            is_actionable = False
+                            break
+                    except (ValueError, TypeError):
+                        # Skip if conversion fails
+                        continue
+
+        if is_actionable:
+            actionable_count += 1
+        total_count += 1
+
+    if total_count == 0:
+        return None
+
+    return round(actionable_count / total_count * 100, 1)
+
+
 def _compute_top_features(valid_cf_rows: pd.DataFrame) -> str:
     """Compute top 4 most changed features."""
     if len(valid_cf_rows) == 0:
@@ -329,6 +419,9 @@ def generate_comparison_report(summaries: list[ExperimentSummary]) -> pd.DataFra
             "valid_cfs": summary.valid_cfs,
             "validity_%": f"{summary.validity_pct:.1f}%",
             "solved_%": f"{summary.solved_pct:.1f}%",
+            "actionable_%": _format_float(summary.actionable_pct, 1) + "%"
+            if summary.actionable_pct is not None
+            else "",
             "avg_nchanged": _format_float(summary.avg_nchanged, 2),
             "avg_nchanged_all": _format_float(summary.avg_nchanged_all, 2),
             "avg_gower_valid": _format_float(summary.avg_gower_valid, 2),

@@ -35,11 +35,22 @@ python -m analysis.cli --all --output results.csv --quiet
 
 Generates a comparison table with metrics:
 - **Configuration**: explainer type, model type, parameters
-- **Validity metrics**: validity %, solved %
+- **Validity metrics**:
+  - `validity_%` - CFs that meet risk target
+  - `solved_%` - patients with at least one valid CF
+  - `actionable_%` - CFs respecting directional constraints (feasibility)
 - **Feature changes**: avg Nchanged, Gower distance
 - **Risk metrics**: risk reduction, avg risk before/after
 - **Performance**: generation time per patient
 - **Feature analysis**: most frequently changed features
+
+### Actionability (Feasibility)
+
+The `actionable_%` metric measures whether CFs respect directional constraints:
+- **Should increase** (healthier when higher): cgtsmok, alcfreq, dosprt
+- **Should decrease** (healthier when lower): bmi, etfruit, eatveg, slprl, paccnois
+
+A CF is **actionable** if it only suggests changes in the beneficial direction. This aligns with DiCE's concept of feasibility/actionability - whether the suggested changes are realistic and make sense for improving health outcomes.
 
 ## Requirements
 
