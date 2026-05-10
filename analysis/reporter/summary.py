@@ -65,6 +65,7 @@ class ExperimentSummary:
     risk_reduction_pct: Optional[float]
 
     # Performance
+    total_gen_time_sec: float
     avg_gen_time_sec: float
 
     # Feature analysis
@@ -133,6 +134,7 @@ def summarize_experiment(
     risk_reduction_pct = _compute_risk_reduction(original_rows, valid_cf_rows)
 
     # Performance
+    total_gen_time_sec = original_rows["cf_gen_time_sec"].sum()
     avg_gen_time_sec = original_rows["cf_gen_time_sec"].mean()
 
     # Feature analysis
@@ -175,6 +177,7 @@ def summarize_experiment(
         avg_risk_after_pct=avg_risk_after_pct,
         min_risk_after_pct=min_risk_after_pct,
         risk_reduction_pct=risk_reduction_pct,
+        total_gen_time_sec=total_gen_time_sec,
         avg_gen_time_sec=avg_gen_time_sec,
         top_features=top_features,
         sparsity_param=sparsity_param,
@@ -320,6 +323,7 @@ def generate_comparison_report(summaries: list[ExperimentSummary]) -> pd.DataFra
             "avg_risk_after_%": _format_float(summary.avg_risk_after_pct, 1),
             "min_risk_after_%": _format_float(summary.min_risk_after_pct, 1),
             "risk_reduction_%": _format_float(summary.risk_reduction_pct, 1),
+            "total_gen_time_sec": f"{summary.total_gen_time_sec:.2f}",
             "avg_gen_time_sec": f"{summary.avg_gen_time_sec:.2f}",
             "top_features": summary.top_features,
         }
