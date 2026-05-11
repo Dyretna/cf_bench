@@ -2,7 +2,7 @@
 train_path: "data/full.csv"
 test_path: "data/cfcheck.csv"
 model_path: "models/xgb_SMOTE_simple.pkl"
-output_dir: "cf_outputs/SMOTE/base_predictors/"
+output_dir: "cf_outputs/predictors_vs_threshold/SMOTE/base_predictors/"
 
 # system config
 backend: "sklearn"

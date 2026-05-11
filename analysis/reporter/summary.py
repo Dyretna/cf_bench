@@ -65,10 +65,10 @@ class ExperimentSummary:
     avg_nchanged_all: Optional[float]
     avg_gower_valid: Optional[float]
 
-    # Risk metrics
-    avg_risk_before_pct: Optional[float]
-    avg_risk_after_pct: Optional[float]
-    min_risk_after_pct: Optional[float]
+    # Risk metrics (as probabilities, not percentages)
+    avg_risk_before: Optional[float]
+    avg_risk_after: Optional[float]
+    min_risk_after: Optional[float]
     risk_reduction_pct: Optional[float]
 
     # Performance
@@ -151,9 +151,11 @@ def summarize_experiment(
     avg_gower_valid = _compute_avg_gower(valid_cf_rows)
 
     # Risk metrics
-    avg_risk_before_pct = _compute_avg_risk_before(original_rows)
-    avg_risk_after_pct = _compute_avg_risk_after(valid_cf_rows)
-    min_risk_after_pct = _compute_min_risk_after(valid_cf_rows)
+    avg_risk_before = _compute_avg_risk_before(
+        cf_rows
+    )  # risk_before is in CF rows, not original
+    avg_risk_after = _compute_avg_risk_after(valid_cf_rows)
+    min_risk_after = _compute_min_risk_after(valid_cf_rows)
     risk_reduction_pct = _compute_risk_reduction(original_rows, valid_cf_rows)
 
     # Performance
@@ -197,9 +199,9 @@ def summarize_experiment(
         avg_nchanged=avg_nchanged,
         avg_nchanged_all=avg_nchanged_all,
         avg_gower_valid=avg_gower_valid,
-        avg_risk_before_pct=avg_risk_before_pct,
-        avg_risk_after_pct=avg_risk_after_pct,
-        min_risk_after_pct=min_risk_after_pct,
+        avg_risk_before=avg_risk_before,
+        avg_risk_after=avg_risk_after,
+        min_risk_after=min_risk_after,
         risk_reduction_pct=risk_reduction_pct,
         total_gen_time_sec=total_gen_time_sec,
         avg_gen_time_sec=avg_gen_time_sec,
@@ -239,7 +241,7 @@ def _compute_avg_risk_before(original_rows: pd.DataFrame) -> Optional[float]:
     mean_val = original_rows["risk_before"].mean()
     if np.isnan(mean_val):
         return None
-    return round(mean_val * 100, 1)
+    return round(mean_val, 4)
 
 
 def _compute_avg_risk_after(valid_cf_rows: pd.DataFrame) -> Optional[float]:
@@ -247,7 +249,7 @@ def _compute_avg_risk_after(valid_cf_rows: pd.DataFrame) -> Optional[float]:
     if len(valid_cf_rows) == 0 or "predicted_risk_after" not in valid_cf_rows.columns:
         return None
     mean_val = valid_cf_rows["predicted_risk_after"].mean()
-    return round(mean_val * 100, 1) if not np.isnan(mean_val) else None
+    return round(mean_val, 4) if not np.isnan(mean_val) else None
 
 
 def _compute_min_risk_after(valid_cf_rows: pd.DataFrame) -> Optional[float]:
@@ -255,7 +257,7 @@ def _compute_min_risk_after(valid_cf_rows: pd.DataFrame) -> Optional[float]:
     if len(valid_cf_rows) == 0 or "predicted_risk_after" not in valid_cf_rows.columns:
         return None
     min_val = valid_cf_rows["predicted_risk_after"].min()
-    return round(min_val * 100, 1) if not np.isnan(min_val) else None
+    return round(min_val, 4) if not np.isnan(min_val) else None
 
 
 def _compute_risk_reduction(
@@ -265,22 +267,22 @@ def _compute_risk_reduction(
     if len(valid_cf_rows) == 0:
         return None
     if (
-        "risk_before" not in original_rows.columns
+        "risk_before" not in valid_cf_rows.columns
         or "predicted_risk_after" not in valid_cf_rows.columns
     ):
         return None
 
     reductions = []
     for qid in valid_cf_rows["query_index"].unique():
-        original = original_rows[original_rows["query_index"] == qid]
-        if len(original) == 0:
+        # Get risk_before from the CF rows for this person (all CFs have same risk_before)
+        person_cfs = valid_cf_rows[valid_cf_rows["query_index"] == qid]
+        if len(person_cfs) == 0:
             continue
-        risk_before = original["risk_before"].values[0]
+        risk_before = person_cfs["risk_before"].iloc[0]
         if np.isnan(risk_before) or risk_before == 0:
             continue
 
-        person_valid = valid_cf_rows[valid_cf_rows["query_index"] == qid]
-        for _, cf in person_valid.iterrows():
+        for _, cf in person_cfs.iterrows():
             risk_after = cf["predicted_risk_after"]
             if not np.isnan(risk_after):
                 reduction = (risk_before - risk_after) / risk_before * 100
@@ -425,9 +427,9 @@ def generate_comparison_report(summaries: list[ExperimentSummary]) -> pd.DataFra
             "avg_nchanged": _format_float(summary.avg_nchanged, 2),
             "avg_nchanged_all": _format_float(summary.avg_nchanged_all, 2),
             "avg_gower_valid": _format_float(summary.avg_gower_valid, 2),
-            "avg_risk_before_%": _format_float(summary.avg_risk_before_pct, 1),
-            "avg_risk_after_%": _format_float(summary.avg_risk_after_pct, 1),
-            "min_risk_after_%": _format_float(summary.min_risk_after_pct, 1),
+            "avg_risk_before": _format_float(summary.avg_risk_before, 4),
+            "avg_risk_after": _format_float(summary.avg_risk_after, 4),
+            "min_risk_after": _format_float(summary.min_risk_after, 4),
             "risk_reduction_%": _format_float(summary.risk_reduction_pct, 1),
             "total_gen_time_sec": f"{summary.total_gen_time_sec:.2f}",
             "avg_gen_time_sec": f"{summary.avg_gen_time_sec:.2f}",

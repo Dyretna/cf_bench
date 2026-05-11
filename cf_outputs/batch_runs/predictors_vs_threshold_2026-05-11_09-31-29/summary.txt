@@ -1,0 +1,54 @@
+================================================================================
+BATCH RUN SUMMARY
+================================================================================
+Timestamp: 2026-05-11_09-31-29
+Config Directory: configs/predictors_vs_threshold
+
+Completed: 15/27 successful
+
+Failed configs (12):
+  [X] SMOTE/base_rf_SMOTE_lowthres.yaml
+      Reason: Exit code 1
+  [X] SMOTE/base_xgb_SMOTE_lowthres.yaml
+      Reason: Exit code 1
+  [X] SMOTE/gs_rf_SMOTE_highthres.yaml
+      Reason: Exit code 1
+  [X] SMOTE/gs_rf_SMOTE_lowthres.yaml
+      Reason: Exit code 1
+  [X] SMOTE/gs_xgb_SMOTE_highthres.yaml
+      Reason: Exit code 1
+  [X] SMOTE/gs_xgb_SMOTE_lowthres.yaml
+      Reason: Exit code 1
+  [X] weighted/optRF_high_thres.yaml
+      Reason: Exit code 1
+  [X] weighted/optRF_low_thres.yaml
+      Reason: Exit code 1
+  [X] weighted/optRF_mid_thres.yaml
+      Reason: Exit code 1
+  [X] weighted/optXGB_high_thres.yaml
+      Reason: Exit code 1
+  [X] weighted/optXGB_low_thres.yaml
+      Reason: Exit code 1
+  [X] weighted/optXGB_mid_thres.yaml
+      Reason: Exit code 1
+
+Successful configs:
+  [OK] SMOTE/base_rf_SMOTE_highthres.yaml
+  [OK] SMOTE/base_rf_SMOTE_midthres.yaml
+  [OK] SMOTE/base_xgb_SMOTE_highthres.yaml
+  [OK] SMOTE/base_xgb_SMOTE_midthres.yaml
+  [OK] SMOTE/gs_rf_SMOTE_midthres.yaml
+  [OK] SMOTE/gs_xgb_SMOTE_midthres.yaml
+  [OK] baseline/rf_highthres.yaml
+  [OK] baseline/rf_lowthres.yaml
+  [OK] baseline/rf_midthres.yaml
+  [OK] baseline/xgb_highthres.yaml
+  [OK] baseline/xgb_lowthres.yaml
+  [OK] baseline/xgb_midthres.yaml
+  [OK] optimized_XGBoost/xgboost_highthres.yaml
+  [OK] optimized_XGBoost/xgboost_lowthres.yaml
+  [OK] optimized_XGBoost/xgboost_midthres.yaml
+================================================================================
+
+Full log: cf_outputs/batch_runs/predictors_vs_threshold_2026-05-11_09-31-29/batch_run.log
+Summary: cf_outputs/batch_runs/predictors_vs_threshold_2026-05-11_09-31-29/summary.txt

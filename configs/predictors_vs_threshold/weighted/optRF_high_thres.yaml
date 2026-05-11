@@ -1,8 +1,8 @@
 # paths
 train_path: "data/full.csv"
 test_path: "data/cfcheck.csv"
-model_path: "models/rf_optimized_hltprhc.pkl"
-output_dir: "cf_outputs/weighted_predictors_mid_thres"
+model_path: "models/rf_weighted.pkl"
+output_dir: "cf_outputs/predictors_vs_threshold/weighted"
 
 # system config
 backend: "sklearn"
@@ -10,7 +10,7 @@ backend: "sklearn"
 # profile, eg. DiCE model
 explainer_profile: "genetic"
 use_permitted_range: true
-total_CFs: 20
+total_CFs: 10
 
 # variables to vary
 stopping_threshold: 0.9

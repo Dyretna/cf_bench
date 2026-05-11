@@ -2,7 +2,7 @@
 train_path: "data/full.csv"
 test_path: "data/cfcheck.csv"
 model_path: "models/xgb_optimized.pkl"
-output_dir: "cf_outputs/xgb_optimized"
+output_dir: "cf_outputs/predictors_vs_threshold/xgb_optimized"
 
 # system config
 backend: "sklearn"
