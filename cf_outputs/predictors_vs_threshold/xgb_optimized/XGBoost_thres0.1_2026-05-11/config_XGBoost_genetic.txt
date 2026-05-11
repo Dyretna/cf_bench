@@ -25,8 +25,8 @@ verbose                : False
 
 === TIMING INFORMATION ===
 
-Total CF generation time: 10.72s
-Average time per instance: 1.19s
-Min time: 1.05s
-Max time: 1.33s
+Total CF generation time: 10.56s
+Average time per instance: 1.17s
+Min time: 1.02s
+Max time: 1.35s
 Number of instances: 9
