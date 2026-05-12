@@ -34,6 +34,14 @@ SHOULD_INCREASE = ["cgtsmok", "alcfreq", "dosprt"]
 # Features that should decrease for better health (lower is better)
 SHOULD_DECREASE = ["bmi", "etfruit", "eatveg", "slprl", "paccnois"]
 
+# Gower distance thresholds for categorization
+GOWER_LOW_THRESHOLD = (
+    0.02  # Threshold for "trivial" changes (very small feature modifications)
+)
+GOWER_HIGH_THRESHOLD = (
+    0.35  # Threshold for "extreme" changes (large feature modifications)
+)
+
 
 @dataclass
 class ExperimentSummary:
@@ -61,9 +69,29 @@ class ExperimentSummary:
     actionable_pct: Optional[float]
 
     # Feature change metrics
-    avg_nchanged: Optional[float]
+    avg_nchanged_valid: Optional[float]
     avg_nchanged_all: Optional[float]
+
+    # Gower distance analysis - ALL CFs
+    avg_gower_all: Optional[float]
+    min_gower_all: Optional[float]
+    max_gower_all: Optional[float]
+    low_gower_count_all: int  # count where gower < 0.02
+    low_gower_pct_all: float  # % where gower < 0.02
+    high_gower_count_all: int  # count where gower > 0.35
+    high_gower_pct_all: float  # % where gower > 0.35
+    gower_q25_all: Optional[float]
+    gower_median_all: Optional[float]
+    gower_q75_all: Optional[float]
+
+    # Gower distance analysis - VALID CFs only
     avg_gower_valid: Optional[float]
+    min_gower_valid: Optional[float]
+    max_gower_valid: Optional[float]
+    low_gower_count_valid: int  # count where gower < 0.02
+    low_gower_pct_valid: float  # % where gower < 0.02
+    high_gower_count_valid: int  # count where gower > 0.35
+    high_gower_pct_valid: float  # % where gower > 0.35
 
     # Risk metrics (as probabilities, not percentages)
     avg_risk_before: Optional[float]
@@ -146,9 +174,27 @@ def summarize_experiment(
     actionable_pct = _compute_actionable_pct(df, original_rows, cf_rows)
 
     # Feature change metrics
-    avg_nchanged = _compute_avg_nchanged(valid_cf_rows)
+    avg_nchanged_valid = _compute_avg_nchanged(valid_cf_rows)
     avg_nchanged_all = _compute_avg_nchanged(cf_rows)
+
+    # Gower distance analysis - ALL CFs
+    avg_gower_all = _compute_avg_gower(cf_rows)
+    min_gower_all = _compute_min_gower(cf_rows)
+    max_gower_all = _compute_max_gower(cf_rows)
+    low_gower_count_all, low_gower_pct_all = _compute_low_gower_metrics(cf_rows)
+    high_gower_count_all, high_gower_pct_all = _compute_high_gower_metrics(cf_rows)
+    gower_q25_all, gower_median_all, gower_q75_all = _compute_gower_quartiles(cf_rows)
+
+    # Gower distance analysis - VALID CFs only
     avg_gower_valid = _compute_avg_gower(valid_cf_rows)
+    min_gower_valid = _compute_min_gower(valid_cf_rows)
+    max_gower_valid = _compute_max_gower(valid_cf_rows)
+    low_gower_count_valid, low_gower_pct_valid = _compute_low_gower_metrics(
+        valid_cf_rows
+    )
+    high_gower_count_valid, high_gower_pct_valid = _compute_high_gower_metrics(
+        valid_cf_rows
+    )
 
     # Risk metrics
     avg_risk_before = _compute_avg_risk_before(
@@ -196,9 +242,25 @@ def summarize_experiment(
         validity_pct=validity_pct,
         solved_pct=solved_pct,
         actionable_pct=actionable_pct,
-        avg_nchanged=avg_nchanged,
+        avg_nchanged_valid=avg_nchanged_valid,
         avg_nchanged_all=avg_nchanged_all,
+        avg_gower_all=avg_gower_all,
+        min_gower_all=min_gower_all,
+        max_gower_all=max_gower_all,
+        low_gower_count_all=low_gower_count_all,
+        low_gower_pct_all=low_gower_pct_all,
+        high_gower_count_all=high_gower_count_all,
+        high_gower_pct_all=high_gower_pct_all,
+        gower_q25_all=gower_q25_all,
+        gower_median_all=gower_median_all,
+        gower_q75_all=gower_q75_all,
         avg_gower_valid=avg_gower_valid,
+        min_gower_valid=min_gower_valid,
+        max_gower_valid=max_gower_valid,
+        low_gower_count_valid=low_gower_count_valid,
+        low_gower_pct_valid=low_gower_pct_valid,
+        high_gower_count_valid=high_gower_count_valid,
+        high_gower_pct_valid=high_gower_pct_valid,
         avg_risk_before=avg_risk_before,
         avg_risk_after=avg_risk_after,
         min_risk_after=min_risk_after,
@@ -232,6 +294,102 @@ def _compute_avg_gower(cf_rows: pd.DataFrame) -> Optional[float]:
     values = pd.to_numeric(cf_rows["gower_distance"], errors="coerce")
     mean_val = values.mean()
     return round(mean_val, 2) if not np.isnan(mean_val) else None
+
+
+def _compute_min_gower(cf_rows: pd.DataFrame) -> Optional[float]:
+    """Compute minimum Gower distance for CFs."""
+    if len(cf_rows) == 0 or "gower_distance" not in cf_rows.columns:
+        return None
+    values = pd.to_numeric(cf_rows["gower_distance"], errors="coerce")
+    min_val = values.min()
+    return round(min_val, 4) if not np.isnan(min_val) else None
+
+
+def _compute_max_gower(cf_rows: pd.DataFrame) -> Optional[float]:
+    """Compute maximum Gower distance for CFs."""
+    if len(cf_rows) == 0 or "gower_distance" not in cf_rows.columns:
+        return None
+    values = pd.to_numeric(cf_rows["gower_distance"], errors="coerce")
+    max_val = values.max()
+    return round(max_val, 4) if not np.isnan(max_val) else None
+
+
+def _compute_low_gower_metrics(
+    cf_rows: pd.DataFrame, threshold: float = None
+) -> tuple[int, float]:
+    """
+    Compute count and percentage of CFs with low Gower distance.
+
+    Args:
+        cf_rows: DataFrame of counterfactuals (valid or all)
+        threshold: Gower distance threshold for "low" (default: GOWER_LOW_THRESHOLD)
+
+    Returns:
+        (count, percentage) tuple
+    """
+    if threshold is None:
+        threshold = GOWER_LOW_THRESHOLD
+
+    if len(cf_rows) == 0 or "gower_distance" not in cf_rows.columns:
+        return 0, 0.0
+
+    values = pd.to_numeric(cf_rows["gower_distance"], errors="coerce")
+    low_count = (values < threshold).sum()
+    low_pct = (low_count / len(cf_rows)) * 100 if len(cf_rows) > 0 else 0.0
+
+    return int(low_count), round(low_pct, 1)
+
+
+def _compute_high_gower_metrics(
+    cf_rows: pd.DataFrame, threshold: float = None
+) -> tuple[int, float]:
+    """
+    Compute count and percentage of CFs with high Gower distance.
+
+    Args:
+        cf_rows: DataFrame of counterfactuals (valid or all)
+        threshold: Gower distance threshold for "high" (default: GOWER_HIGH_THRESHOLD)
+
+    Returns:
+        (count, percentage) tuple
+    """
+    if threshold is None:
+        threshold = GOWER_HIGH_THRESHOLD
+
+    if len(cf_rows) == 0 or "gower_distance" not in cf_rows.columns:
+        return 0, 0.0
+
+    values = pd.to_numeric(cf_rows["gower_distance"], errors="coerce")
+    high_count = (values > threshold).sum()
+    high_pct = (high_count / len(cf_rows)) * 100 if len(cf_rows) > 0 else 0.0
+
+    return int(high_count), round(high_pct, 1)
+
+
+def _compute_gower_quartiles(
+    cf_rows: pd.DataFrame,
+) -> tuple[Optional[float], Optional[float], Optional[float]]:
+    """
+    Compute quartiles for Gower distance distribution.
+
+    Args:
+        cf_rows: DataFrame of counterfactuals (typically all CFs)
+
+    Returns:
+        (q25, median, q75) tuple
+    """
+    if len(cf_rows) == 0 or "gower_distance" not in cf_rows.columns:
+        return None, None, None
+
+    values = pd.to_numeric(cf_rows["gower_distance"], errors="coerce").dropna()
+    if len(values) == 0:
+        return None, None, None
+
+    q25 = values.quantile(0.25)
+    median = values.quantile(0.50)
+    q75 = values.quantile(0.75)
+
+    return round(q25, 4), round(median, 4), round(q75, 4)
 
 
 def _compute_avg_risk_before(original_rows: pd.DataFrame) -> Optional[float]:
@@ -424,9 +582,25 @@ def generate_comparison_report(summaries: list[ExperimentSummary]) -> pd.DataFra
             "actionable_%": _format_float(summary.actionable_pct, 1) + "%"
             if summary.actionable_pct is not None
             else "",
-            "avg_nchanged": _format_float(summary.avg_nchanged, 2),
+            "avg_nchanged_valid": _format_float(summary.avg_nchanged_valid, 2),
             "avg_nchanged_all": _format_float(summary.avg_nchanged_all, 2),
+            "avg_gower_all": _format_float(summary.avg_gower_all, 2),
+            "min_gower_all": _format_float(summary.min_gower_all, 4),
+            "max_gower_all": _format_float(summary.max_gower_all, 4),
+            "low_gower_count_all": summary.low_gower_count_all,
+            f"low_gower_<{GOWER_LOW_THRESHOLD}_%_all": f"{summary.low_gower_pct_all:.1f}%",
+            "high_gower_count_all": summary.high_gower_count_all,
+            f"high_gower_>{GOWER_HIGH_THRESHOLD}_%_all": f"{summary.high_gower_pct_all:.1f}%",
+            "gower_q25_all": _format_float(summary.gower_q25_all, 4),
+            "gower_median_all": _format_float(summary.gower_median_all, 4),
+            "gower_q75_all": _format_float(summary.gower_q75_all, 4),
             "avg_gower_valid": _format_float(summary.avg_gower_valid, 2),
+            "min_gower_valid": _format_float(summary.min_gower_valid, 4),
+            "max_gower_valid": _format_float(summary.max_gower_valid, 4),
+            "low_gower_count_valid": summary.low_gower_count_valid,
+            f"low_gower_<{GOWER_LOW_THRESHOLD}_%_valid": f"{summary.low_gower_pct_valid:.1f}%",
+            "high_gower_count_valid": summary.high_gower_count_valid,
+            f"high_gower_>{GOWER_HIGH_THRESHOLD}_%_valid": f"{summary.high_gower_pct_valid:.1f}%",
             "avg_risk_before": _format_float(summary.avg_risk_before, 4),
             "avg_risk_after": _format_float(summary.avg_risk_after, 4),
             "min_risk_after": _format_float(summary.min_risk_after, 4),
