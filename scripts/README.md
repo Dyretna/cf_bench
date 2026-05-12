@@ -1,8 +1,10 @@
 # Scripts
 
-Utility scripts for managing annotated.csv files.
+Utility scripts for managing the cf_bench project.
 
-## migrate_annotated_results.py
+## Data File Management
+
+### migrate_annotated_results.py
 
 Standardizes annotated.csv files to current format with proper rounding and column ordering.
 

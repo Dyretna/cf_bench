@@ -70,6 +70,31 @@ MODELS_DIR=/path/to/models
 CF_OUTPUTS=/path/to/counterfactuals
 ```
 
+## Centralized Path Management (New!)
+
+The project now includes a **path resolver** utility that automatically finds experiment outputs without hardcoding paths:
+
+```python
+from cf_bench.utils import get_experiment_path
+
+# Automatically finds the latest experiment
+df = pd.read_csv(
+    get_experiment_path("baseline", "XGBoost", 0.5, filename="annotated.csv")
+)
+```
+
+**Benefits:**
+- No more manual path construction in notebooks
+- Automatically uses latest experiment or specify date
+- Clear error messages when experiments not found
+- Programmatic discovery of available experiments
+
+**Documentation:**
+- [Path Resolver Guide](docs/path_resolver_guide.md) - Complete reference
+- [Quick Reference](docs/path_resolver_quick_ref.md) - Common patterns
+- [Demo Notebook](notebooks/path_resolver_demo.ipynb) - Interactive examples
+- [Migration Guide](docs/notebook_migration_examples.md) - Update existing notebooks
+
 ## Usage
 1. Create a .env file with your local paths
 2. Select or edit a YAML config in configs/
