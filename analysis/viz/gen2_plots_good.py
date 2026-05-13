@@ -175,7 +175,7 @@ def _plot_row_risk(axes, row_idx, df_risk, language, threshold_order, style_info
         elif metric == "Risk_Reduction_%":
             ax.set_ylim(0, 105)
         elif metric in ["Avg_NChanged_All", "Avg_NChanged_Valid"]:
-            ax.set_ylim(1.5, 4.0)
+            ax.set_ylim(2.0, 3.5)
 
 
 def _plot_row_gower_all(
@@ -405,10 +405,10 @@ def create_comprehensive_plot_good(
     fig.legend(
         handles=legend_elements,
         loc="upper left",
-        bbox_to_anchor=(0.01, 0.99),
+        bbox_to_anchor=(0.765, 0.961),
         frameon=True,
-        fontsize=9,
-        ncol=3,
+        fontsize=14,
+        ncol=1,
     )
 
     # Add title if provided
@@ -552,10 +552,10 @@ def create_performance_risk_plot_good(
     fig.legend(
         handles=legend_elements,
         loc="upper left",
-        bbox_to_anchor=(0.01, 0.99),
+        bbox_to_anchor=(0.765, 0.985),
         frameon=True,
         fontsize=9,
-        ncol=3,
+        ncol=1,
     )
 
     # Add title if provided
@@ -690,10 +690,10 @@ def create_gower_plot_good(
     fig.legend(
         handles=legend_elements,
         loc="upper left",
-        bbox_to_anchor=(0.01, 0.99),
+        bbox_to_anchor=(0.765, 0.985),
         frameon=True,
         fontsize=9,
-        ncol=3,
+        ncol=1,
     )
 
     # Add title if provided
