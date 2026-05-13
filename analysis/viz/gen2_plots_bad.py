@@ -309,7 +309,7 @@ def create_comprehensive_plot(
         plt.tight_layout()
         plt.subplots_adjust(top=0.955, left=0.06, right=0.95, hspace=0.3)
     else:
-        # Add default Swedish title if language is Swedish
+        # Add default title based on language
         if language == "sv":
             fig.suptitle(
                 "Analysöversikt: Prestanda, Risk och Gower-avstånd",
@@ -317,11 +317,15 @@ def create_comprehensive_plot(
                 fontweight="bold",
                 y=0.995,
             )
-            plt.tight_layout()
-            plt.subplots_adjust(top=0.955, left=0.06, right=0.95, hspace=0.3)
         else:
-            plt.tight_layout()
-            plt.subplots_adjust(top=0.96, left=0.06, right=0.95, hspace=0.3)
+            fig.suptitle(
+                "Comprehensive Analysis: Performance, Risk and Gower Metrics",
+                fontsize=13,
+                fontweight="bold",
+                y=0.995,
+            )
+        plt.tight_layout()
+        plt.subplots_adjust(top=0.955, left=0.06, right=0.95, hspace=0.3)
 
     # Save if requested
     if output_path:
