@@ -219,7 +219,7 @@ def _plot_row_gower_valid(
             ax.set_ylim(-0.01, 0.3)
 
 
-def create_comprehensive_plot(
+def create_comprehensive_plot_by_category(
     df_dict,
     category_info,
     language="en",

@@ -282,14 +282,19 @@ def _plot_row_gower_valid(
             ax.set_ylim(-0.01, 0.3)
 
 
-def create_comprehensive_plot_good(
-    df, language="en", figsize=(16, 14), title=None, output_path=None
+def create_comprehensive_plot_by_threshold(
+    df,
+    language="en",
+    figsize=(16, 14),
+    title=None,
+    output_path=None,
+    model_configs=None,
 ):
     """
-    Create comprehensive 4-row analysis plot for baseline/optimized experiments.
+    Create comprehensive 4-row analysis plot for threshold-based experiments.
 
     X-axis: Thresholds (0.1, 0.5, 0.9)
-    Lines: 3 model configurations (Baseline RF, Baseline XGB, Optimized XGB)
+    Lines: Model configurations (auto-detected or specified)
 
     Args:
         df: DataFrame with processed metrics (needs Category, Model, Threshold columns)
@@ -297,6 +302,7 @@ def create_comprehensive_plot_good(
         figsize: Figure size tuple
         title: Optional plot title
         output_path: Optional path to save figure
+        model_configs: Optional list of model configurations to plot. If None, auto-detect from data.
 
     Returns:
         fig, axes
@@ -307,32 +313,33 @@ def create_comprehensive_plot_good(
     # Prepare threshold-based data
     df_dict = prepare_plot_data_threshold(df)
 
-    # Threshold order
-    threshold_order = [0.1, 0.5, 0.9]
+    # Auto-detect model configurations if not provided
+    if model_configs is None:
+        df_copy = df.copy()
+        df_copy["Model_Config"] = df_copy["Category"] + " " + df_copy["Model"]
+        model_configs = sorted(df_copy["Model_Config"].unique())
 
-    # Style configuration for 3 model configurations
+    # Get unique thresholds from data
+    threshold_order = sorted(df["Threshold"].unique())
+
+    # Default colors and styles
+    default_colors = ["#0173B2", "#DE8F05", "#029E73", "#CC78BC", "#CA9161"]
+    default_markers = ["o", "s", "^", "D", "v"]
+    default_linestyles = ["-", "-", "--", "-.", ":"]
+
+    # Style configuration - build dynamically
     style_info = {
-        "model_configs": [
-            "Baseline RandomForest",
-            "Baseline XGBoost",
-            "Optimized XGBoost XGBoost",
-        ],
-        "colors": {
-            "Baseline RandomForest": "#0173B2",
-            "Baseline XGBoost": "#DE8F05",
-            "Optimized XGBoost XGBoost": "#029E73",
-        },
-        "linestyles": {
-            "Baseline RandomForest": "-",
-            "Baseline XGBoost": "-",
-            "Optimized XGBoost XGBoost": "--",
-        },
-        "markers": {
-            "Baseline RandomForest": "o",
-            "Baseline XGBoost": "s",
-            "Optimized XGBoost XGBoost": "^",
-        },
+        "model_configs": model_configs,
+        "colors": {},
+        "linestyles": {},
+        "markers": {},
     }
+
+    for i, config in enumerate(model_configs):
+        idx = i % len(default_colors)
+        style_info["colors"][config] = default_colors[idx]
+        style_info["markers"][config] = default_markers[idx]
+        style_info["linestyles"][config] = default_linestyles[idx]
 
     # Plot each row
     _plot_row_performance(
@@ -346,61 +353,27 @@ def create_comprehensive_plot_good(
         axes, 3, df_dict["gower_valid"], language, threshold_order, style_info
     )
 
-    # Create legend
-    legend_labels = {
-        "sv": {
-            "Baseline RandomForest": "Baslinje RF",
-            "Baseline XGBoost": "Baslinje XGB",
-            "Optimized XGBoost XGBoost": "Optimerad XGB",
-        },
-        "en": {
-            "Baseline RandomForest": "Baseline RF",
-            "Baseline XGBoost": "Baseline XGB",
-            "Optimized XGBoost XGBoost": "Optimized XGB",
-        },
-    }
+    # Create dynamic legend
+    legend_elements = []
+    for config in model_configs:
+        # Simplify label - remove category prefix if present
+        label = config.split(" ", 1)[-1] if " " in config else config
 
-    legend_elements = [
-        Line2D(
-            [0],
-            [0],
-            color=style_info["colors"]["Baseline RandomForest"],
-            marker=style_info["markers"]["Baseline RandomForest"],
-            markersize=8,
-            markerfacecolor=style_info["colors"]["Baseline RandomForest"],
-            markeredgewidth=1.5,
-            label=legend_labels[language]["Baseline RandomForest"],
-            linestyle=style_info["linestyles"]["Baseline RandomForest"],
-            linewidth=2.5,
-            alpha=0.7,
-        ),
-        Line2D(
-            [0],
-            [0],
-            color=style_info["colors"]["Baseline XGBoost"],
-            marker=style_info["markers"]["Baseline XGBoost"],
-            markersize=8,
-            markerfacecolor=style_info["colors"]["Baseline XGBoost"],
-            markeredgewidth=1.5,
-            label=legend_labels[language]["Baseline XGBoost"],
-            linestyle=style_info["linestyles"]["Baseline XGBoost"],
-            linewidth=2.5,
-            alpha=0.7,
-        ),
-        Line2D(
-            [0],
-            [0],
-            color=style_info["colors"]["Optimized XGBoost XGBoost"],
-            marker=style_info["markers"]["Optimized XGBoost XGBoost"],
-            markersize=8,
-            markerfacecolor=style_info["colors"]["Optimized XGBoost XGBoost"],
-            markeredgewidth=1.5,
-            label=legend_labels[language]["Optimized XGBoost XGBoost"],
-            linestyle=style_info["linestyles"]["Optimized XGBoost XGBoost"],
-            linewidth=2.5,
-            alpha=0.7,
-        ),
-    ]
+        legend_elements.append(
+            Line2D(
+                [0],
+                [0],
+                color=style_info["colors"][config],
+                marker=style_info["markers"][config],
+                markersize=8,
+                markerfacecolor=style_info["colors"][config],
+                markeredgewidth=1.5,
+                label=label,
+                linestyle=style_info["linestyles"][config],
+                linewidth=2.5,
+                alpha=0.7,
+            )
+        )
 
     fig.legend(
         handles=legend_elements,
