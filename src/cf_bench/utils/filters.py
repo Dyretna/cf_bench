@@ -177,7 +177,7 @@ def select_gower_cf(group):
 # ---------------------------------------------------------
 
 
-def select_one_cf_per_query(df: pd.DataFrame, selector="best"):
+def select_one_cf_per_query(df: pd.DataFrame, selector):
     """
     Full pipeline:
     - Convert Gower to numeric
@@ -187,7 +187,7 @@ def select_one_cf_per_query(df: pd.DataFrame, selector="best"):
     - Sort so xin appears first
 
     selector options:
-        "best"   -> select_best_cf (lowest Gower)
+        "gower"   -> select_gower_cf (lowest Gower)
         "random" -> select_random_cf (legacy)
     """
     df = df.copy()
