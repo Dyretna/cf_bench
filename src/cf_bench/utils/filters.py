@@ -54,7 +54,7 @@ def filter_valid_cfs(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def select_one_cf_per_query(
+def select_one_cf_per_query_legacy(
     df: pd.DataFrame, prefer_no_violations: bool = True, random_state: int = 42
 ) -> pd.DataFrame:
     """
@@ -119,3 +119,107 @@ def select_one_cf_per_query(
     ).drop(columns="_is_original")
 
     return result
+
+
+# -----------------------------------------------------------------------------
+# NEW Notebook variants.
+# added select_random_cfs, since it is what we used in old noteboks
+# select_best_cfs now takes the CF with lower GOwer, instead of a random CF
+# -----------------------------------------------------------------------------
+
+# ---------------------------------------------------------
+# LEGACY FUNCTION — RANDOM CF SELECTOR
+# ---------------------------------------------------------
+
+
+def select_random_cf(group):
+    """
+    LEGACY FUNCTION.
+    Select one random CF that is valid and has no violations (Expected == "").
+    This function is kept for reproducibility of earlier experiments.
+    New analyses should use select_best_cf() instead.
+    """
+    group = group.copy()
+    is_valid = group["valid"].isin([True, "True"])
+
+    valid_cfs = group[is_valid]
+    if len(valid_cfs) > 0:
+        return valid_cfs.sample(n=1, random_state=42)
+
+    return group.iloc[[0]]
+
+
+# ---------------------------------------------------------
+# NEW FUNCTION — LOWEST GOWER SELECTOR
+# ---------------------------------------------------------
+
+
+def select_gower_cf(group):
+    """
+    Select the valid CF with the lowest Gower distance, preferring no violations.
+    This is the recommended method for all new analyses.
+    """
+    group = group.copy()
+    group["gower_distance"] = pd.to_numeric(group["gower_distance"], errors="coerce")
+
+    # Any valid CF
+    is_valid = group["valid"].isin([True, "True"])
+    valid = group[is_valid]
+    if len(valid) > 0:
+        return valid.nsmallest(1, "gower_distance")
+
+    # Last resort
+    return group.iloc[[0]]
+
+
+# ---------------------------------------------------------
+# FULL PIPELINE — PREPARE + SELECT + MERGE + SORT
+# ---------------------------------------------------------
+
+
+def select_one_cf_per_query(df: pd.DataFrame, selector="best"):
+    """
+    Full pipeline:
+    - Convert Gower to numeric
+    - Split xin vs CF rows
+    - Select exactly one CF per query_index using chosen selector
+    - Merge xin + selected CF
+    - Sort so xin appears first
+
+    selector options:
+        "best"   -> select_best_cf (lowest Gower)
+        "random" -> select_random_cf (legacy)
+    """
+    df = df.copy()
+    df["gower_distance"] = pd.to_numeric(df["gower_distance"], errors="coerce")
+
+    # Split baseline and CF rows
+    df_xin = df[df["cf_id"] == "xin"]
+    df_cf = df[df["cf_id"] != "xin"]
+
+    # Choose selector function
+    if selector == "random":
+        func = select_random_cf
+    else:
+        func = select_gower_cf
+
+    # Apply selection
+    df_cf_selected = (
+        df_cf.groupby("query_index", group_keys=False)
+        .apply(func)
+        .reset_index(drop=True)
+    )
+
+    # Combine xin + selected CF
+    out = pd.concat([df_xin, df_cf_selected], ignore_index=True)
+
+    # Ensure xin appears first
+    out["is_xin"] = (out["cf_id"] == "xin").astype(int)
+    out = out.sort_values(["query_index", "is_xin"], ascending=[True, False]).drop(
+        columns="is_xin"
+    )
+
+    # Convert Gower to string and fill NaN
+    out["gower_distance"] = out["gower_distance"].astype("object").fillna("")
+
+    return out
