@@ -34,7 +34,7 @@ produce the most accurate, realistic, and meaningful counterfactual transitions 
 ├── cf_outputs/         # Generated counterfactuals
 ├── configs/            # YAML configuration files for pipeline runs
 ├── data/               # dataset directory
-├── notebooks/          # Jupyter notebooks for experiments and analysis
+├── notebooks/          # Jupyter notebooks for training ML-models, cf-experiments and analysis
 ├── src/                # Python package source code
 │   └── cf_bench/
 ├── models/             # Saved predictor models
