@@ -1,0 +1,15 @@
+# paths
+train_path: "data/full.csv"
+test_path: "data/cfcheck.csv"
+model_path: "models/nn_hltprhc.keras"
+output_dir: "cf_outputs"
+scaler_path: "models/scaler.pkl"
+
+# system config
+backend: "TF2"
+
+# profile, eg. DiCE model
+explainer_profile: "gradient"
+total_cfs: 20 # 10 is not enough....
+stopping_threshold: None   # does not use with gradient
+use_permitted_range: true
