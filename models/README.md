@@ -1,8 +1,6 @@
-# Models
-models are saved into this folder.
+# Re-training the models locally
+models must be saved into this folder locally.
 They are too big to be saved on the repo.
 
-Use notebooks in:
+To retrain the models locally, use notebooks in:
 - notebooks/predictors/
-
-to retrain the models.
