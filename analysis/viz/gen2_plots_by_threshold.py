@@ -445,22 +445,22 @@ def create_performance_risk_plot_good(
         "model_configs": [
             "Baseline RandomForest",
             "Baseline XGBoost",
-            "Optimized XGBoost XGBoost",
+            "Optimized XGBoost",
         ],
         "colors": {
             "Baseline RandomForest": "#0173B2",
             "Baseline XGBoost": "#DE8F05",
-            "Optimized XGBoost XGBoost": "#029E73",
+            "Optimized XGBoost": "#029E73",
         },
         "linestyles": {
             "Baseline RandomForest": "-",
             "Baseline XGBoost": "-",
-            "Optimized XGBoost XGBoost": "--",
+            "Optimized XGBoost": "--",
         },
         "markers": {
             "Baseline RandomForest": "o",
             "Baseline XGBoost": "s",
-            "Optimized XGBoost XGBoost": "^",
+            "Optimized XGBoost": "^",
         },
     }
 
@@ -475,12 +475,12 @@ def create_performance_risk_plot_good(
         "sv": {
             "Baseline RandomForest": "Baslinje RF",
             "Baseline XGBoost": "Baslinje XGB",
-            "Optimized XGBoost XGBoost": "Optimerad XGB",
+            "Optimized XGBoost": "Optimerad XGB",
         },
         "en": {
             "Baseline RandomForest": "Baseline RF",
             "Baseline XGBoost": "Baseline XGB",
-            "Optimized XGBoost XGBoost": "Optimized XGB",
+            "Optimized XGBoost": "Optimized XGB",
         },
     }
 
@@ -514,13 +514,13 @@ def create_performance_risk_plot_good(
         Line2D(
             [0],
             [0],
-            color=style_info["colors"]["Optimized XGBoost XGBoost"],
-            marker=style_info["markers"]["Optimized XGBoost XGBoost"],
+            color=style_info["colors"]["Optimized XGBoost"],
+            marker=style_info["markers"]["Optimized XGBoost"],
             markersize=8,
-            markerfacecolor=style_info["colors"]["Optimized XGBoost XGBoost"],
+            markerfacecolor=style_info["colors"]["Optimized XGBoost"],
             markeredgewidth=1.5,
-            label=legend_labels[language]["Optimized XGBoost XGBoost"],
-            linestyle=style_info["linestyles"]["Optimized XGBoost XGBoost"],
+            label=legend_labels[language]["Optimized XGBoost"],
+            linestyle=style_info["linestyles"]["Optimized XGBoost"],
             linewidth=2.5,
             alpha=0.7,
         ),
@@ -581,22 +581,22 @@ def create_gower_plot_good(
         "model_configs": [
             "Baseline RandomForest",
             "Baseline XGBoost",
-            "Optimized XGBoost XGBoost",
+            "Optimized XGBoost",
         ],
         "colors": {
             "Baseline RandomForest": "#0173B2",
             "Baseline XGBoost": "#DE8F05",
-            "Optimized XGBoost XGBoost": "#029E73",
+            "Optimized XGBoost": "#029E73",
         },
         "linestyles": {
             "Baseline RandomForest": "-",
             "Baseline XGBoost": "-",
-            "Optimized XGBoost XGBoost": "--",
+            "Optimized XGBoost": "--",
         },
         "markers": {
             "Baseline RandomForest": "o",
             "Baseline XGBoost": "s",
-            "Optimized XGBoost XGBoost": "^",
+            "Optimized XGBoost": "^",
         },
     }
 
@@ -613,12 +613,12 @@ def create_gower_plot_good(
         "sv": {
             "Baseline RandomForest": "Baslinje RF",
             "Baseline XGBoost": "Baslinje XGB",
-            "Optimized XGBoost XGBoost": "Optimerad XGB",
+            "Optimized XGBoost": "Optimerad XGB",
         },
         "en": {
             "Baseline RandomForest": "Baseline RF",
             "Baseline XGBoost": "Baseline XGB",
-            "Optimized XGBoost XGBoost": "Optimized XGB",
+            "Optimized XGBoost": "Optimized XGB",
         },
     }
 
@@ -652,13 +652,13 @@ def create_gower_plot_good(
         Line2D(
             [0],
             [0],
-            color=style_info["colors"]["Optimized XGBoost XGBoost"],
-            marker=style_info["markers"]["Optimized XGBoost XGBoost"],
+            color=style_info["colors"]["Optimized XGBoost"],
+            marker=style_info["markers"]["Optimized XGBoost"],
             markersize=8,
-            markerfacecolor=style_info["colors"]["Optimized XGBoost XGBoost"],
+            markerfacecolor=style_info["colors"]["Optimized XGBoost"],
             markeredgewidth=1.5,
-            label=legend_labels[language]["Optimized XGBoost XGBoost"],
-            linestyle=style_info["linestyles"]["Optimized XGBoost XGBoost"],
+            label=legend_labels[language]["Optimized XGBoost"],
+            linestyle=style_info["linestyles"]["Optimized XGBoost"],
             linewidth=2.5,
             alpha=0.7,
         ),

@@ -1,30 +1,13 @@
-# Counterfactual Transitions in Cardiovascular Disease (CVD) Predictions
+# Counterfactual Explanations in Python using DiCE
 
-## Project Overview
-With the rapid growth of machine learning and explainable AI (XAI) in healthcare, **counterfactual explanations** have become a powerful tool for making predictive models actionable at the individual level.
+This repository contains the full implementation, experiments and analysis from my thesis project on counterfactual explanations (CFs) applied to public health survey data. The goal of the project is to evaluate how different machine learning models and DiCE explainers behave when generating counterfactuals, and how model calibration, probability structure and parameter settings (such as `stopping_threshold`) influence the validity and feasibility of the generated CFs.
 
-This project evaluates counterfactual explanation methods for heart‑disease prediction models. As part of Nightingale’s *ai‑whatif* initiative, the Python framework `DiCE` is tested across multiple predictor models.
-Related repositories explore the R‑based framework `dandl`, allowing for cross‑framework comparisons.
+The project uses data from the European Social Survey (ESS) and focuses on predicting cardiovascular disease based on lifestyle variables. Two prediction models are explored — **Random Forest** and **XGBoost** — together with DiCE’s **random-search** and **genetic** explainers. The experiments are organized into three phases:
 
-The overall aim is to understand how different counterfactual algorithms perform in terms of **validity**, **plausibility**, and **computational speed**.
+- Baseline models, explainers, constraints
+- Model optimization via SMOTE and class weighting
+- Threshold‑sensitivity experiments to study how CF generation interacts with model calibration
 
-## Project Goals — Experimental Focus
-To investigate which combinations of:
-
-- machine‑learning predictor models, and
-- counterfactual‑generation algorithms
-
-produce the most accurate, realistic, and meaningful counterfactual transitions across lifestyle‑related health factors.
-
-## Methods and Tools
-- **Data source:** European Social Survey (ESS) derived dataset (cleaned and feature-engineered)
-- **Counterfactual framework:** DiCE (Diverse Counterfactual Explanations)
-- **Predictive models - for CVD risk prediction:**
-      - Random Forest classifier
-      - XGboost
-      - tensorflow nn-models
-
-- **Approach:** Model-agnostic counterfactual generation
 
 ---
 
